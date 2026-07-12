@@ -1,0 +1,44 @@
+{
+  "_note": "Avatar (Summoner blood pact) -> ordered skillchain properties, transcribed from Scott's Horizon Skillchain Guide PDF page 5. Same property tokens as weapons.json; resolves against data/skillchains.json.",
+
+  "avatars": {
+    "carbuncle": { "label": "Carbuncle", "skills": [
+      { "name": "Poison Nails", "properties": ["transfixion"] }
+    ]},
+    "fenrir": { "label": "Fenrir", "skills": [
+      { "name": "Moonlit Charge", "properties": ["compression"] },
+      { "name": "Crescent Fang",  "properties": ["transfixion"] },
+      { "name": "Eclipse Bite",   "properties": ["gravitation"] }
+    ]},
+    "garuda": { "label": "Garuda", "skills": [
+      { "name": "Claw",          "properties": ["detonation"] },
+      { "name": "Predator Claws","properties": ["fragmentation"] }
+    ]},
+    "ifrit": { "label": "Ifrit", "skills": [
+      { "name": "Punch",         "properties": ["liquefaction"] },
+      { "name": "Burning Strike","properties": ["impaction"] },
+      { "name": "Double Punch",  "properties": ["compression"] },
+      { "name": "Flaming Crush", "properties": ["fusion"] }
+    ]},
+    "leviathan": { "label": "Leviathan", "skills": [
+      { "name": "Barracuda Dive","properties": ["reverberation"] },
+      { "name": "Tail Whip",     "properties": ["detonation"] },
+      { "name": "Spinning Dive", "properties": ["distortion"] }
+    ]},
+    "ramuh": { "label": "Ramuh", "skills": [
+      { "name": "Shock Strike",  "properties": ["impaction"] },
+      { "name": "Chaotic Strike","properties": ["fragmentation"] }
+    ]},
+    "shiva": { "label": "Shiva", "skills": [
+      { "name": "Axe Kick",    "properties": ["induration"] },
+      { "name": "Double Slap", "properties": ["scission"] },
+      { "name": "Rush",        "properties": ["distortion"] }
+    ]},
+    "titan": { "label": "Titan", "skills": [
+      { "name": "Rock Throw",     "properties": ["scission"] },
+      { "name": "Rock Buster",    "properties": ["reverberation"] },
+      { "name": "Megalith Throw", "properties": ["induration"] },
+      { "name": "Mountain Buster","properties": ["gravitation"] }
+    ]}
+  }
+}

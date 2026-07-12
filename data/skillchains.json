@@ -1,0 +1,62 @@
+{
+  "_note": "Source of truth = Scott's Horizon Skillchain Guide PDF, page 1. Combination table (property -> skillchain) is standard FFXI logic and matches the PDF. Only the weapon-skill -> property assignments (weapons.json / summons.json) are Horizon-custom. VERIFY the 'elements' on tier-1 chains and the tier-3 unordered rule against in-game before shipping.",
+
+  "properties": {
+    "transfixion":  { "element": "light",     "color": "#F4D23C", "label": "Transfixion" },
+    "compression":  { "element": "dark",      "color": "#1A1A1A", "label": "Compression" },
+    "liquefaction": { "element": "fire",      "color": "#E23B2E", "label": "Liquefaction" },
+    "scission":     { "element": "earth",     "color": "#E08A3C", "label": "Scission" },
+    "reverberation":{ "element": "water",     "color": "#2E4FD8", "label": "Reverberation" },
+    "induration":   { "element": "ice",       "color": "#4FB8E8", "label": "Induration" },
+    "impaction":    { "element": "lightning", "color": "#9B3FC4", "label": "Impaction" },
+    "detonation":   { "element": "wind",      "color": "#5FC24E", "label": "Detonation" }
+  },
+
+  "skillchains": {
+    "scission":      { "tier": 1, "elements": ["earth"] },
+    "reverberation": { "tier": 1, "elements": ["water"] },
+    "liquefaction":  { "tier": 1, "elements": ["fire"] },
+    "impaction":     { "tier": 1, "elements": ["lightning"] },
+    "detonation":    { "tier": 1, "elements": ["wind"] },
+    "compression":   { "tier": 1, "elements": ["dark"] },
+    "induration":    { "tier": 1, "elements": ["ice"] },
+    "transfixion":   { "tier": 1, "elements": ["light"] },
+
+    "fusion":        { "tier": 2, "elements": ["light", "fire"] },
+    "fragmentation": { "tier": 2, "elements": ["lightning", "wind"] },
+    "gravitation":   { "tier": 2, "elements": ["dark", "earth"] },
+    "distortion":    { "tier": 2, "elements": ["water", "ice"] },
+
+    "light":         { "tier": 3, "elements": ["light", "fire", "lightning", "wind"] },
+    "darkness":      { "tier": 3, "elements": ["dark", "earth", "water", "ice"] }
+  },
+
+  "_combos_note": "Each entry: [openerProperty, closerProperty] -> resulting skillchain. Tier 1 & 2 are ORDER-DEPENDENT. Tier 3 is order-free (both directions listed). Chaining rule (confirmed by Scott): a floating T1 result can open into another T1 or up into T2; a floating T2 result can ONLY go up into T3; never T2->T2, never T2->T1; T3 ends the chain.",
+  "combos": [
+    { "open": "liquefaction",  "close": "scission",      "chain": "scission" },
+    { "open": "detonation",    "close": "scission",      "chain": "scission" },
+    { "open": "transfixion",   "close": "reverberation", "chain": "reverberation" },
+    { "open": "scission",      "close": "reverberation", "chain": "reverberation" },
+    { "open": "impaction",     "close": "liquefaction",  "chain": "liquefaction" },
+    { "open": "scission",      "close": "liquefaction",  "chain": "liquefaction" },
+    { "open": "reverberation", "close": "impaction",     "chain": "impaction" },
+    { "open": "induration",    "close": "impaction",     "chain": "impaction" },
+    { "open": "impaction",     "close": "detonation",    "chain": "detonation" },
+    { "open": "compression",   "close": "detonation",    "chain": "detonation" },
+    { "open": "scission",      "close": "detonation",    "chain": "detonation" },
+    { "open": "induration",    "close": "compression",   "chain": "compression" },
+    { "open": "transfixion",   "close": "compression",   "chain": "compression" },
+    { "open": "reverberation", "close": "induration",    "chain": "induration" },
+    { "open": "compression",   "close": "transfixion",   "chain": "transfixion" },
+
+    { "open": "liquefaction",  "close": "impaction",     "chain": "fusion" },
+    { "open": "induration",    "close": "reverberation", "chain": "fragmentation" },
+    { "open": "detonation",    "close": "compression",   "chain": "gravitation" },
+    { "open": "transfixion",   "close": "scission",      "chain": "distortion" },
+
+    { "open": "fusion",        "close": "fragmentation", "chain": "light" },
+    { "open": "fragmentation", "close": "fusion",        "chain": "light" },
+    { "open": "gravitation",   "close": "distortion",    "chain": "darkness" },
+    { "open": "distortion",    "close": "gravitation",   "chain": "darkness" }
+  ]
+}

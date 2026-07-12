@@ -1,0 +1,11 @@
+{
+  "_note": "Horizon in-game confirmations & corrections, layered on top of the PDF base data at load time. Base files (skillchains/weapons/summons.json) stay pristine PDF truth; everything Horizon-verified accumulates here.",
+  "_schema": {
+    "weaponSkillProperties": "object: 'Weapon Skill Name' -> [property tokens]. Overrides that WS's properties entirely (e.g. Horizon gives it different attributes).",
+    "comboOverrides": "array of { open, close, chain, note }. Changes/adds a property combination. chain=null means this ordered pair does NOT skillchain on Horizon.",
+    "pairConfirmations": "array of { a, b, result, status, note }. Empirical WS-pair results tested in-game. status: 'confirmed' | 'fizzles' | 'different'. 'a' opens, 'b' closes."
+  },
+  "weaponSkillProperties": {},
+  "comboOverrides": [],
+  "pairConfirmations": []
+}

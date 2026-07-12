@@ -1,0 +1,159 @@
+{
+  "_note": "Weapon skill -> ordered skillchain properties, transcribed from Scott's Horizon Skillchain Guide PDF pages 2-4. Property tokens: 8 tier-1 (transfixion, compression, liquefaction, scission, reverberation, induration, impaction, detonation) + 4 tier-2 badges shown in the PDF as fused two-color orbs (fusion=light+fire, fragmentation=lightning+wind, gravitation=dark+earth, distortion=water+ice). All tokens resolve against data/skillchains.json. VERIFY flagged items in _verify below.",
+  "_verify": [
+    "Staff 'Spirit Taker' = no skillchain property (confirmed - matches retail).",
+    "Horizon in-game confirmations/corrections live in data/overrides.json, not here. Keep this file as the clean PDF transcription."
+  ],
+
+  "weapons": {
+    "archery": { "label": "Archery", "skills": [
+      { "name": "Flaming Arrow",  "properties": ["liquefaction", "transfixion"] },
+      { "name": "Piercing Arrow", "properties": ["reverberation", "transfixion"] },
+      { "name": "Dulling Arrow",  "properties": ["liquefaction", "transfixion"] },
+      { "name": "Sidewinder",     "properties": ["reverberation", "transfixion"] },
+      { "name": "Blast Arrow",    "properties": ["induration", "transfixion"] },
+      { "name": "Arching Arrow",  "properties": ["fusion"] },
+      { "name": "Empyreal Arrow", "properties": ["fusion", "transfixion"] }
+    ]},
+    "axe": { "label": "Axe", "skills": [
+      { "name": "Raging Axe",    "properties": ["detonation", "impaction"] },
+      { "name": "Smash Axe",     "properties": ["induration", "reverberation"] },
+      { "name": "Gale Axe",      "properties": ["detonation"] },
+      { "name": "Avalanche Axe", "properties": ["scission", "impaction"] },
+      { "name": "Spinning Axe",  "properties": ["liquefaction", "scission"] },
+      { "name": "Rampage",       "properties": ["scission"] },
+      { "name": "Calamity",      "properties": ["scission", "impaction"] },
+      { "name": "Mistral Axe",   "properties": ["fusion"] },
+      { "name": "Decimation",    "properties": ["fusion", "reverberation"] }
+    ]},
+    "club": { "label": "Club", "skills": [
+      { "name": "Shining Strike", "properties": ["impaction"] },
+      { "name": "Seraph Strike",  "properties": ["impaction"] },
+      { "name": "Brainshaker",    "properties": ["reverberation"] },
+      { "name": "Skullbreaker",   "properties": ["induration", "reverberation"] },
+      { "name": "True Strike",    "properties": ["detonation", "reverberation"] },
+      { "name": "Judgement",      "properties": ["impaction"] },
+      { "name": "Hexa Strike",    "properties": ["fusion"] },
+      { "name": "Black Halo",     "properties": ["fragmentation", "transfixion"] }
+    ]},
+    "dagger": { "label": "Dagger", "skills": [
+      { "name": "Wasp Sting",    "properties": ["scission"] },
+      { "name": "Gust Slash",    "properties": ["detonation"] },
+      { "name": "Shadowstitch",  "properties": ["reverberation"] },
+      { "name": "Viper Bite",    "properties": ["scission"] },
+      { "name": "Cyclone",       "properties": ["detonation", "impaction"] },
+      { "name": "Dancing Edge",  "properties": ["scission", "detonation"] },
+      { "name": "Shark Bite",    "properties": ["fragmentation"] },
+      { "name": "Evisceration",  "properties": ["gravitation"] }
+    ]},
+    "great_axe": { "label": "Great Axe", "skills": [
+      { "name": "Shield Break", "properties": ["impaction"] },
+      { "name": "Iron Tempest", "properties": ["scission"] },
+      { "name": "Sturmwind",    "properties": ["reverberation", "scission"] },
+      { "name": "Armor Break",  "properties": ["impaction"] },
+      { "name": "Keen Edge",    "properties": ["compression"] },
+      { "name": "Weapon Break", "properties": ["impaction"] },
+      { "name": "Raging Rush",  "properties": ["induration", "reverberation"] },
+      { "name": "Full Break",   "properties": ["distortion"] },
+      { "name": "Steel Cyclone","properties": ["distortion", "detonation"] }
+    ]},
+    "great_katana": { "label": "Great Katana", "skills": [
+      { "name": "Tachi: Enpi",     "properties": ["transfixion", "scission"] },
+      { "name": "Tachi: Hobaku",   "properties": ["induration"] },
+      { "name": "Tachi: Goten",    "properties": ["transfixion", "impaction"] },
+      { "name": "Tachi: Kagero",   "properties": ["liquefaction"] },
+      { "name": "Tachi: Jinpu",    "properties": ["scission", "detonation"] },
+      { "name": "Tachi: Koki",     "properties": ["reverberation", "impaction"] },
+      { "name": "Tachi: Yukikaze", "properties": ["induration", "detonation"] },
+      { "name": "Tachi: Gekko",    "properties": ["distortion", "reverberation"] },
+      { "name": "Tachi: Kasha",    "properties": ["fusion", "compression"] }
+    ]},
+    "great_sword": { "label": "Great Sword", "skills": [
+      { "name": "Hard Slash",     "properties": ["scission"] },
+      { "name": "Power Slash",    "properties": ["transfixion"] },
+      { "name": "Frostbite",      "properties": ["induration"] },
+      { "name": "Freezebite",     "properties": ["induration", "detonation"] },
+      { "name": "Shockwave",      "properties": ["reverberation"] },
+      { "name": "Crescent Moon",  "properties": ["scission"] },
+      { "name": "Sickle Moon",    "properties": ["scission", "impaction"] },
+      { "name": "Spinning Slash", "properties": ["fragmentation"] },
+      { "name": "Ground Strike",  "properties": ["fragmentation", "distortion"] }
+    ]},
+    "hand_to_hand": { "label": "Hand-to-Hand", "skills": [
+      { "name": "Combo",           "properties": ["impaction"] },
+      { "name": "Shoulder Tackle", "properties": ["reverberation", "impaction"] },
+      { "name": "One Inch Punch",  "properties": ["compression"] },
+      { "name": "Backhand Blow",   "properties": ["detonation"] },
+      { "name": "Raging Fists",    "properties": ["impaction"] },
+      { "name": "Spinning Attack", "properties": ["liquefaction", "impaction"] },
+      { "name": "Howling Fist",    "properties": ["transfixion", "impaction"] },
+      { "name": "Dragon Kick",     "properties": ["fragmentation"] },
+      { "name": "Asuran Fists",    "properties": ["gravitation", "liquefaction"] }
+    ]},
+    "katana": { "label": "Katana", "skills": [
+      { "name": "Blade: Rin",   "properties": ["transfixion"] },
+      { "name": "Blade: Retsu", "properties": ["scission"] },
+      { "name": "Blade: Teki",  "properties": ["reverberation"] },
+      { "name": "Blade: To",    "properties": ["induration", "detonation"] },
+      { "name": "Blade: Chi",   "properties": ["transfixion", "impaction"] },
+      { "name": "Blade: Ei",    "properties": ["compression"] },
+      { "name": "Blade: Jin",   "properties": ["detonation", "impaction"] },
+      { "name": "Blade: Ten",   "properties": ["gravitation"] },
+      { "name": "Blade: Ku",    "properties": ["gravitation", "transfixion"] }
+    ]},
+    "marksmanship": { "label": "Marksmanship", "skills": [
+      { "name": "Hot Shot",   "properties": ["liquefaction", "transfixion"] },
+      { "name": "Split Shot", "properties": ["reverberation", "transfixion"] },
+      { "name": "Sniper Shot","properties": ["liquefaction", "transfixion"] },
+      { "name": "Slug Shot",  "properties": ["reverberation", "transfixion"] },
+      { "name": "Blast Shot", "properties": ["induration", "transfixion"] },
+      { "name": "Heavy Shot", "properties": ["fusion"] },
+      { "name": "Detonator",  "properties": ["fusion", "transfixion"] }
+    ]},
+    "polearm": { "label": "Polearm", "skills": [
+      { "name": "Double Thrust",  "properties": ["transfixion"] },
+      { "name": "Thunder Thrust", "properties": ["transfixion", "impaction"] },
+      { "name": "Raiden Thrust",  "properties": ["transfixion", "impaction"] },
+      { "name": "Leg Sweep",      "properties": ["impaction"] },
+      { "name": "Penta Thrust",   "properties": ["compression"] },
+      { "name": "Vorpal Thrust",  "properties": ["reverberation", "transfixion"] },
+      { "name": "Skewer",         "properties": ["transfixion", "impaction"] },
+      { "name": "Wheeling Thrust","properties": ["fusion"] },
+      { "name": "Impulse Drive",  "properties": ["gravitation", "induration"] }
+    ]},
+    "scythe": { "label": "Scythe", "skills": [
+      { "name": "Slice",           "properties": ["scission"] },
+      { "name": "Dark Harvest",    "properties": ["reverberation"] },
+      { "name": "Shadow of Death", "properties": ["induration", "reverberation"] },
+      { "name": "Nightmare Scythe","properties": ["compression", "scission"] },
+      { "name": "Spinning Scythe", "properties": ["reverberation", "scission"] },
+      { "name": "Vorpal Scythe",   "properties": ["transfixion", "scission"] },
+      { "name": "Guillotine",      "properties": ["induration"] },
+      { "name": "Cross Reaper",    "properties": ["distortion"] },
+      { "name": "Spiral Hell",     "properties": ["distortion", "scission"] }
+    ]},
+    "staff": { "label": "Staff", "skills": [
+      { "name": "Heavy Swing",   "properties": ["impaction"] },
+      { "name": "Rock Crusher",  "properties": ["impaction"] },
+      { "name": "Earth Crusher", "properties": ["detonation", "impaction"] },
+      { "name": "Starburst",     "properties": ["compression", "reverberation"] },
+      { "name": "Sunburst",      "properties": ["compression", "reverberation"] },
+      { "name": "Shell Crusher", "properties": ["detonation"] },
+      { "name": "Full Swing",    "properties": ["liquefaction", "impaction"] },
+      { "name": "Spirit Taker",  "properties": [] },
+      { "name": "Retribution",   "properties": ["gravitation", "reverberation"] }
+    ]},
+    "sword": { "label": "Sword", "skills": [
+      { "name": "Fast Blade",      "properties": ["scission"] },
+      { "name": "Burning Blade",   "properties": ["liquefaction"] },
+      { "name": "Red Lotus Blade", "properties": ["liquefaction", "detonation"] },
+      { "name": "Flat Blade",      "properties": ["impaction"] },
+      { "name": "Shining Blade",   "properties": ["scission"] },
+      { "name": "Seraph Blade",    "properties": ["scission"] },
+      { "name": "Circle Blade",    "properties": ["reverberation", "impaction"] },
+      { "name": "Vorpal Blade",    "properties": ["scission", "impaction"] },
+      { "name": "Swift Blade",     "properties": ["gravitation"] },
+      { "name": "Savage Blade",    "properties": ["fragmentation", "scission"] }
+    ]}
+  }
+}

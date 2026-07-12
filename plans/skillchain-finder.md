@@ -2,8 +2,8 @@
 
 **Branch:** `main`
 **Created:** 2026-07-12
-**Status:** In Progress - Phase 1, Step 1.6 (deploy) — engine + UI built and validated, running locally
-**Next Action:** Commit, create the public GitHub repo, enable GitHub Pages. Consider a "Level II+ only" filter for the tier-1 noise.
+**Status:** Phase 1 COMPLETE — v1 live at https://sdjohnso.github.io/horizon-skillchains/
+**Next Action:** Verify data in-game and log results to data/overrides.json (see CLAUDE.md workflow). Then Phase 2 (enemy filter) or polish (icons via Gemini, results filter).
 **Purpose:** Ship a mobile-first GitHub Pages tool where a player picks 2 combatants and sees every skillchain they can make.
 **Security:** N/A — no DB, APIs, endpoints, or server-side user input. Purely static client-side lookups.
 
@@ -72,7 +72,7 @@ index.html ── loads ──> /data/*.json ──> engine.js (pure lookup) ─
 - [x] **1.3** `summons.json` (p.5, 8 avatars) DONE. No `jobs.json` — v1 selects weapon type directly.
 - [x] **1.4** `engine.js` — enumerates WS pairs both directions + overrides layer. **Validated** via node harness (Ifrit×Ramuh=Light, Sword×GSword=Darkness, etc. all correct).
 - [x] **1.5** UI (`index.html`/`styles.css`/`app.js`) — 2 pickers, mobile-first, crystal orbs, tiered results, empty states. Screenshotted at 390px.
-- [ ] **1.6** Deploy to GitHub Pages. **Validation:** load on a phone, run a real party combo.
+- [x] **1.6** Deployed to GitHub Pages (public repo sdjohnso/horizon-skillchains). Live URL verified 200, data loads over HTTPS, screenshotted Ifrit×Ramuh in production.
 - [ ] **1.7** (polish) Optional "Level II+ only" filter — tier-1 pairs produce a lot of results.
 
 ### Phase 2 — Enemy weakness filter (v2)

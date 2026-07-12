@@ -26,6 +26,17 @@
       </div>
     </section>
 
+    <section class="enemy-pick" aria-label="Enemy">
+      <label for="selEnemy">Enemy <span class="opt">— optional, trims to what it&rsquo;s weak to</span></label>
+      <div class="enemy-row">
+        <input id="selEnemy" class="enemy-input" list="mob-list" placeholder="Type an enemy family&hellip;"
+               autocomplete="off" autocapitalize="words" spellcheck="false" />
+        <button id="enemyClear" class="enemy-clear" type="button" aria-label="Clear enemy" hidden>&times;</button>
+      </div>
+      <datalist id="mob-list"></datalist>
+      <div id="enemyBar" class="enemy-bar" hidden></div>
+    </section>
+
     <section id="results" class="results" aria-live="polite"></section>
 
     <footer class="foot">

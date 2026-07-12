@@ -17,8 +17,10 @@
     weapons: null,     // data/weapons.json
     summons: null,     // data/summons.json
     overrides: null,   // data/overrides.json
+    mobs: null,        // data/mobs.json
     comboMap: null,    // "open|close" -> chainName
-    elementColor: null // element -> hex
+    elementColor: null,// element -> hex
+    elements: null     // the 8 element tokens
   };
 
   function key(open, close) { return open + "|" + close; }
@@ -31,6 +33,21 @@
       map[prop.element] = prop.color;
     });
     return map;
+  }
+
+  // Expand a mob's weak/strong list to a lookup of element->true.
+  // "all" (rainbow orb) expands to every element; result carries a .__all marker.
+  function expandElems(list) {
+    var out = {};
+    (list || []).forEach(function (e) {
+      if (e === "all") {
+        out.__all = true;
+        state.elements.forEach(function (el) { out[el] = true; });
+      } else {
+        out[e] = true;
+      }
+    });
+    return out;
   }
 
   // Build the combo lookup, then apply comboOverrides.
@@ -57,7 +74,7 @@
   // Load all data files. Returns a promise.
   function load(basePath) {
     basePath = basePath || "data/";
-    var files = ["skillchains", "weapons", "summons", "overrides"];
+    var files = ["skillchains", "weapons", "summons", "overrides", "mobs"];
     return Promise.all(files.map(function (f) {
       return fetch(basePath + f + ".json").then(function (r) {
         if (!r.ok) throw new Error("Failed to load " + f + ".json (" + r.status + ")");
@@ -68,7 +85,11 @@
       state.weapons = res[1];
       state.summons = res[2];
       state.overrides = res[3];
+      state.mobs = res[4];
       state.elementColor = buildElementColors(state.skillchains);
+      state.elements = Object.keys(state.skillchains.properties).map(function (p) {
+        return state.skillchains.properties[p].element;
+      });
       state.comboMap = buildComboMap(state.skillchains, state.overrides);
       return state;
     });
@@ -157,6 +178,63 @@
     return arr;
   }
 
+  // ----- enemy weakness (v2) -----
+
+  // Families the v2 picker offers: those with >=1 weak/strong ELEMENT (weapon-only
+  // families like Rafflesia are retained in the data for v3 but not listed here).
+  function listMobs() {
+    var m = state.mobs.mobs;
+    return Object.keys(m).filter(function (name) {
+      var v = m[name];
+      return (v.weak && v.weak.length) || (v.strong && v.strong.length);
+    }).sort(function (a, b) { return a.localeCompare(b); }).map(function (name) {
+      var v = m[name];
+      return { name: name, weak: v.weak || [], strong: v.strong || [], retail: v.retail || null };
+    });
+  }
+
+  function getMob(name) {
+    var v = state.mobs.mobs[name];
+    if (!v) return null;
+    return { name: name, weak: v.weak || [], strong: v.strong || [], retail: v.retail || null };
+  }
+
+  // Tag each chain against a mob. weakHit = chain.elements intersects mob.weak
+  // (the magic-burst window is the whole skillchain's element set). resisted =
+  // every element of the chain is resisted. Returns a summary object; does not mutate input.
+  function tagAgainstMob(chains, mobName) {
+    var mob = getMob(mobName);
+    if (!mob) return { mob: null, chains: chains, weakCount: chains.length, hasWeak: false, weakAll: false, strongAll: false };
+
+    var weakSet = expandElems(mob.weak);
+    var strongSet = expandElems(mob.strong);
+    var weakCount = 0;
+
+    var tagged = chains.map(function (c) {
+      var matched = c.elements.filter(function (e) { return weakSet[e]; });
+      var resisted = c.elements.length > 0 && c.elements.every(function (e) { return strongSet[e]; });
+      var weakHit = matched.length > 0;
+      if (weakHit) weakCount++;
+      var out = {};
+      Object.keys(c).forEach(function (k) { out[k] = c[k]; });
+      out.weakHit = weakHit;
+      out.weakElements = matched;
+      out.resisted = resisted && !weakHit;
+      return out;
+    });
+
+    return {
+      mob: mob,
+      chains: tagged,
+      weakCount: weakCount,
+      hasWeak: mob.weak.length > 0,
+      weakAll: !!weakSet.__all,
+      strongAll: !!strongSet.__all
+    };
+  }
+
+  function elementColorOf(e) { return (state.elementColor && state.elementColor[e]) || "#999"; }
+
   // ----- display helpers -----
 
   // Colors for rendering a property token's orb (1 color for tier-1, 2 for tier-2/3).
@@ -185,6 +263,10 @@
     listSources: listSources,
     getSource: getSource,
     findSkillchains: findSkillchains,
+    listMobs: listMobs,
+    getMob: getMob,
+    tagAgainstMob: tagAgainstMob,
+    elementColorOf: elementColorOf,
     orbColors: orbColors,
     chainLabel: chainLabel,
     propLabel: propLabel,

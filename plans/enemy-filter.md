@@ -2,8 +2,8 @@
 
 **Branch:** `main` (small project; single lane — no worktrees needed)
 **Created:** 2026-07-12
-**Status:** Not Started
-**Next Action:** Study mob chart pages 6-8 structure, define `data/mobs.json` schema, extract a first page as a sample and confirm format before grinding all ~200 mobs.
+**Status:** In Progress — data (2.1/2.2) + engine (2.4) + UI (2.5) all done and screenshot-verified at 390px. Retail (2.3) deferred; commit/deploy (2.6) pending.
+**Next Action:** 2.6 — commit + push (auto-deploys to Pages), phone check on live URL. Then 2.3 retail cross-ref as an enhancement. (Scott has "one more logic" item to fold in after ship.)
 **Purpose:** Let the player pick an enemy and highlight/filter the skillchains that land on an element it's weak to — which also trims the wall of tier-1 results.
 **Security:** N/A — static client-side, no DB/API/user input.
 
@@ -51,25 +51,33 @@ Elements are the 8 game elements (fire, ice, wind, earth, lightning, water, ligh
 as skillchain `elements`, so matching is a direct set intersection. Plus a `all` marker for the
 rainbow orb (weak/strong to everything).
 
-## `data/mobs.json` schema (proposed)
+## `data/mobs.json` schema (FINAL — built)
 
 ```json
 {
   "mobs": {
     "Colibri": {
-      "weak":   ["ice", "light"],       // PDF/Horizon — primary
+      "weak":   ["ice"],                // PDF/Horizon elements — primary (engine uses these)
       "strong": ["wind"],
-      "retail": { "weak": ["ice"], "strong": ["wind"] },  // cross-reference layer
+      "weaponWeak":   ["piercing"],     // DORMANT v3: physical damage-type weakness
+      "weaponStrong": [],               // DORMANT v3
+      "retail": { "weak": ["ice"], "strong": ["wind"] },  // cross-ref layer (added in 2.3)
       "note": ""
     }
   }
 }
 ```
 
-- Top-level `weak`/`strong` = the working (Horizon/PDF) values the engine uses.
-- `retail` = cross-reference; UI shows a subtle flag when it diverges from PDF.
-- Overrides for Horizon corrections continue to go in `data/overrides.json` (add a `mobWeakness`
-  section when needed) — same philosophy as the WS data.
+- Keys are mob **families** (alphabetical, exactly as the chart lists them). 130 families with data.
+- Top-level `weak`/`strong` = working (Horizon/PDF) element values the engine uses. Tokens = 8 elements
+  + `"all"` (rainbow orb = weak/strong to everything).
+- `weaponWeak`/`weaponStrong` = physical damage types (`piercing`/`slashing`/`blunt`/`h2h`) — captured now
+  but **dormant**: v2 ignores them, v3 turns them on. Exact type behind each grey/brown tool icon is
+  **provisional** (see `_weaponLegend._provisional`), verify in the v3 weapon pass.
+- `retail` = cross-reference; added in 2.3; UI shows a subtle flag when it diverges from PDF. Never overwrites PDF.
+- Fully-blank families are **omitted** entirely (not listed). Weapon-only families (Rafflesia) are retained
+  for v3 but the **v2 picker lists only families with ≥1 weak/strong element** (129 of 130).
+- Horizon corrections still go in `data/overrides.json` (`mobWeakness` section) — same philosophy as WS data.
 
 ## Files to Modify / Create
 
@@ -107,16 +115,22 @@ rainbow orb (weak/strong to everything).
 |------|----------|-----------|
 | 2026-07-12 | v2 = elements only; weapon damage-type weakness → v3 | Scott's scope call |
 | 2026-07-12 | Keep PDF + retail as two layers, don't overwrite | Scott wants retail as extra assistance |
+| 2026-07-12 | Document weapon weaknesses NOW (dormant `weaponWeak`/`weaponStrong`), use in v3 | Scott: capture while reading rows — avoids re-extraction. Type taxonomy provisional. |
+| 2026-07-12 | Chart is by **family**; list only families with data | Scott: "it's always by family. I would just list the families that have weaknesses." Fully-blank families omitted. |
+| 2026-07-12 | Keep strong-only families (Behemoth, Ahriman, etc.) in picker | Still drive resist/de-emphasize + rainbow messaging. Revisit if Scott wants weak-only. |
+| 2026-07-12 | Default view = **filter to weak-only** (toggle reveals rest) | Scott — most aggressive trim of the tier-1 wall |
+| 2026-07-12 | Match weak-hit on the **whole skillchain's `elements` set**, NOT a single closing element | Scott: closing element = the WS property only for Tier 1; Tier 2/3 results carry a new multi-element set (Fusion=light+fire, Light=4 elements) with no single "closer" element. The magic-burst window = the full `chain.elements`. Rule: `mob.weak ∩ chain.elements ≠ ∅`. |
+| 2026-07-12 | Element orb legend locked (red=fire/orange=earth/navy=water/cyan=ice/green=wind/purple=lightning/yellow=light/black=dark/rainbow=all) | Verified against Bomb/Demon/Djinn "all-but-one" rows + retail cross-checks. |
 
 ## Phases
 
 ### Phase 2 — Enemy weakness filter
 
-- [ ] **2.1** Study pages 6-8; finalize `mobs.json` schema; extract **page 6** as a sample. **Validation:** Scott eyeballs ~10 decoded mobs for orb-reading accuracy (same red/orange care as WS extraction).
-- [ ] **2.2** Extract pages 7-8 (remaining mobs). **Validation:** every mob on the chart present; spot-check multi-orb rows.
-- [ ] **2.3** Cross-reference retail FFXI weaknesses into each mob's `retail` block; flag divergences.
-- [ ] **2.4** Engine: `mobs` accessor + `tagAgainstMob`. **Validation:** node harness — a mob weak to `fire` highlights Liquefaction/Fusion/Light chains.
-- [ ] **2.5** UI: enemy picker (searchable) + highlight/sort + optional filter toggle + retail-divergence flag. **Validation:** screenshot at 390px with an enemy selected.
+- [x] **2.1** Study pages 6-8; finalize `mobs.json` schema; extract **page 6** as a sample. Scott confirmed page-6 reads ("that all looks good"). Legend locked.
+- [x] **2.2** Extract pages 7-8 (remaining mobs). 130 families total; JSON validates; every non-blank chart row present. Weapon layer captured (dormant).
+- [ ] **2.3** Cross-reference retail FFXI weaknesses into each mob's `retail` block; flag divergences. *(Deferred to post-ship enhancement — retail plumbing already tolerated by engine/UI.)*
+- [x] **2.4** Engine: `listMobs` + `getMob` + `tagAgainstMob` (+ `elementColorOf`). Matches on full `chain.elements`; handles `all` rainbow + strong-all/no-weak fallbacks. **Validated:** node harness — Cluster (weak fire) highlights Liquefaction/Fusion/Light; Colibri resists Detonation; Demon resists 9; Ahriman(strong-all) resists all.
+- [x] **2.5** UI: enemy picker (type-to-filter `<datalist>`) + weak-only default + Show-all toggle + weak-hit glow + hot element chip + resisted dim + enemy summary bar. **Validated:** screenshots at 390px (no-enemy = v1; weak-only trims 7→3; show-all floats hits to top).
 - [ ] **2.6** Commit + push (auto-deploys to Pages). **Validation:** live URL, phone check.
 
 ## Follow-Up Plans (parking lot)

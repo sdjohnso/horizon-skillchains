@@ -173,6 +173,109 @@ html, body {
 .arrow { color: var(--muted); font-weight: 700; }
 .confirm-tick { color: #57d68a; font-weight: 700; }
 
+/* ---- Enemy weakness filter (v2) ---- */
+.enemy-pick { margin: -6px 0 22px; }
+.enemy-pick > label {
+  display: block;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: .6px;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+.enemy-pick .opt { text-transform: none; letter-spacing: 0; opacity: .8; }
+.enemy-row { position: relative; }
+.enemy-input {
+  width: 100%;
+  padding: 12px 38px 12px 12px;
+  font-size: 16px;                 /* >=16px avoids iOS zoom-on-focus */
+  color: var(--text);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  appearance: none;
+  -webkit-appearance: none;
+}
+.enemy-input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+.enemy-input::placeholder { color: var(--muted); }
+.enemy-clear {
+  position: absolute;
+  right: 6px; top: 50%;
+  transform: translateY(-50%);
+  width: 28px; height: 28px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--surface);
+  color: var(--muted);
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+}
+.enemy-clear:hover { color: var(--text); }
+
+.enemy-bar {
+  margin-top: 10px;
+  padding: 10px 12px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.enemy-bar-top { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.enemy-name { font-weight: 700; font-size: 16px; }
+.enemy-orbs { display: inline-flex; align-items: center; gap: 5px; }
+.enemy-orbs-label {
+  font-size: 11px; text-transform: uppercase; letter-spacing: .5px; color: var(--muted); margin-right: 2px;
+}
+.enemy-orbs-all, .enemy-orbs-none { font-size: 12px; color: var(--muted); }
+.enemy-bar-bottom { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.enemy-summary { font-size: 13px; color: var(--muted); }
+.enemy-toggle {
+  flex: 0 0 auto;
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  cursor: pointer;
+}
+.enemy-toggle:hover { border-color: var(--accent); }
+
+/* Rainbow orb for "all elements" */
+.orb.rainbow {
+  background: conic-gradient(#e23b2e, #e08a3c, #f4d23c, #5fc24e, #2e4fd8, #4fb8e8, #9b3fc4, #e23b2e);
+}
+.orb.rainbow::after { display: none; }
+
+/* Weak-hit + resisted chain cards */
+.sc-card.weak-hit {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent), 0 2px 14px rgba(124,198,255,.28);
+}
+.sc-card.resisted { opacity: .5; }
+.weak-flag {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .5px;
+  text-transform: uppercase;
+  color: #04121e;
+  background: var(--accent);
+  padding: 2px 6px;
+  border-radius: 999px;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+.elem-chip.hot {
+  color: #04121e;
+  background: var(--accent);
+  border-color: var(--accent);
+  font-weight: 700;
+}
+
 @media (max-width: 380px) {
   .pickers { grid-template-columns: 1fr; }
   .chain-arrow { display: none; }

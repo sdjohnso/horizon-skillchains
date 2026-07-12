@@ -133,6 +133,11 @@ rainbow orb (weak/strong to everything).
 - [x] **2.5** UI: enemy picker (type-to-filter `<datalist>`) + weak-only default + Show-all toggle + weak-hit glow + hot element chip + resisted dim + enemy summary bar. **Validated:** screenshots at 390px (no-enemy = v1; weak-only trims 7→3; show-all floats hits to top).
 - [ ] **2.6** Commit + push (auto-deploys to Pages). **Validation:** live URL, phone check.
 
+## Post-ship logic — property dominance → moved to its own plan
+
+Confirmed with Scott and promoted to **`plans/property-dominance.md`** (both open questions answered:
+higher tier wins, ties by list-order on opener then closer). Next engine work happens there.
+
 ## Follow-Up Plans (parking lot)
 
 - **v3:** weapon damage-type weakness (piercing/slashing/blunt/H2H) — favor effective weapon types.

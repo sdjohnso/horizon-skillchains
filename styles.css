@@ -338,6 +338,12 @@ html, body {
               0 0 0 2px var(--accent), 0 0 7px rgba(124,198,255,.7);
 }
 
+/* Phones: drop the Magic Burst label + orbs to their own line below the name.
+   Tablets/desktop (wider column) keep them inline on the name row. */
+@media (max-width: 540px) {
+  .sc-mb { flex-basis: 100%; margin-top: 4px; }
+}
+
 @media (max-width: 380px) {
   .pickers { grid-template-columns: 1fr; }
   .chain-arrow { display: none; }

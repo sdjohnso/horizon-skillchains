@@ -321,7 +321,7 @@
     name.appendChild(el("span", "tier-badge", "Level " + Engine.tierRoman(c.tier)));
     if (c.weakHit) name.appendChild(el("span", "weak-flag", "weak"));
     var mb = el("div", "sc-mb");
-    mb.appendChild(el("span", "sc-meta-label", "MB:"));
+    mb.appendChild(el("span", "sc-meta-label", "Magic Burst:"));
     var hot = {};
     (c.weakElements || []).forEach(function (e) { hot[e] = true; });
     c.elements.forEach(function (e) {

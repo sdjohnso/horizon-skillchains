@@ -2,8 +2,8 @@
 
 **Branch:** `main` (small project; single lane — no worktrees needed)
 **Created:** 2026-07-12
-**Status:** In Progress — data (2.1/2.2) + engine (2.4) + UI (2.5) all done and screenshot-verified at 390px. Retail (2.3) deferred; commit/deploy (2.6) pending.
-**Next Action:** 2.6 — commit + push (auto-deploys to Pages), phone check on live URL. Then 2.3 retail cross-ref as an enhancement. (Scott has "one more logic" item to fold in after ship.)
+**Status:** In Progress — data (2.1/2.2) + engine (2.4) + UI (2.5) shipped; property-dominance ("one more logic") shipped as its own plan. **2.3 retail cross-ref now DONE**: 126/130 families have a `retail` block (4 skipped, no retail analog); node-harness validated (JSON parses, no PDF/weapon arrays mutated, tokens valid). Committed + pushed.
+**Next Action:** 2.7 — wire the retail-divergence flag in `app.js`/`styles.css` (data + engine passthrough are ready; UI badge not built yet). Optional: normalize the retail layer's methodology split (see Decisions Log).
 **Purpose:** Let the player pick an enemy and highlight/filter the skillchains that land on an element it's weak to — which also trims the wall of tier-1 results.
 **Security:** N/A — static client-side, no DB/API/user input.
 
@@ -121,6 +121,10 @@ rainbow orb (weak/strong to everything).
 | 2026-07-12 | Default view = **filter to weak-only** (toggle reveals rest) | Scott — most aggressive trim of the tier-1 wall |
 | 2026-07-12 | Match weak-hit on the **whole skillchain's `elements` set**, NOT a single closing element | Scott: closing element = the WS property only for Tier 1; Tier 2/3 results carry a new multi-element set (Fusion=light+fire, Light=4 elements) with no single "closer" element. The magic-burst window = the full `chain.elements`. Rule: `mob.weak ∩ chain.elements ≠ ∅`. |
 | 2026-07-12 | Element orb legend locked (red=fire/orange=earth/navy=water/cyan=ice/green=wind/purple=lightning/yellow=light/black=dark/rainbow=all) | Verified against Bomb/Demon/Djinn "all-but-one" rows + retail cross-checks. |
+| 2026-07-12 | **2.3 retail layer added additively** — `retail:{weak,strong,source}` appended to 126/130 families; PDF `weak`/`strong` never overwritten (script only inserts). | Scott's two-layer rule; keeps "guide says X / retail says Y." |
+| 2026-07-12 | **4 families skipped (no retail block)**: Avatar (weakness varies per avatar), Hydra (per-mob, no family-wide analog), Memory Receptacle (varies per Promyvion zone), Rafflesia (weapon-only, no clear retail element data). | Rule: no silent guessing where no real retail mapping exists. |
+| 2026-07-12 | **Retail research methodology split across chunks — advisory caveat.** Chunks A/B/D–F/T–Y read the consolidated Allakhazam mob-weakness chart (same lineage as the PDF → mostly matches). Chunks C/G–I/K–M/O–R/S read BG Wiki's granular per-element resistance-% tables (anything >100% counted as "weak") → many more/finer weaknesses and thus more "divergences." Net effect: divergence density partly reflects *which source* a chunk used, not just true Horizon-vs-retail signal. Left as-is (sourced, additive, flagged) but a normalization pass to one consistent "primary weakness" definition is a candidate follow-up. | Fan-out gave uneven source discipline; honest to record rather than silently reconcile. |
+| 2026-07-12 | **BG-Wiki-vs-PDF divergences flagged (`source` recorded per family, ~34 total).** Notable: **Ahriman/Cardian** (retail chart reads weak-to-all vs PDF strong-to-all — likely a rainbow-orb reading artifact, treat with suspicion); **Behemoth/Wamoura** (retail = weak to lightning / fire respectively, PDF = strong); **Cerberus** (retail flat 100%, no elemental affinity); **Golem** (retail resist-all/no-weakness); **Skeleton** (retail ice neutral, not strong); **Gigas/Goblin/Goobbue/Khimaira/Slime/Slug/Snoll/Soulflayer/Spider/Peiste/Poroggo/Phuabo/Opo-opo/Orc/Orcish Warmachine/Orobon/Qiqirn/Quadav/Chigoe/Chariots/Chimera/Cluster/Cockatrice/Coeurl/Colibri/Corse/Sandworm** (weak/strong sets differ). FFXIclopedia used as fallback where BG lacked an element table (Clot, Gnole, Soulflayer, Khimaira, most K–M). | Divergence is derivable at render (PDF set ≠ retail set); `source` stored for provenance. |
 
 ## Phases
 
@@ -128,10 +132,11 @@ rainbow orb (weak/strong to everything).
 
 - [x] **2.1** Study pages 6-8; finalize `mobs.json` schema; extract **page 6** as a sample. Scott confirmed page-6 reads ("that all looks good"). Legend locked.
 - [x] **2.2** Extract pages 7-8 (remaining mobs). 130 families total; JSON validates; every non-blank chart row present. Weapon layer captured (dormant).
-- [ ] **2.3** Cross-reference retail FFXI weaknesses into each mob's `retail` block; flag divergences. *(Deferred to post-ship enhancement — retail plumbing already tolerated by engine/UI.)*
+- [x] **2.3** Cross-reference retail FFXI weaknesses into each mob's `retail` block; flag divergences. **DONE:** fanned out ~130 lookups across 9 alphabetical-chunk subagents (BG Wiki primary, FFXIclopedia fallback), merged via scratchpad script that only *appends* `retail:{weak,strong,source}` (PDF arrays untouched). 126 families mapped, **4 skipped** (Avatar, Hydra, Memory Receptacle, Rafflesia — no fixed retail family analog). **~34 divergences** from PDF flagged (derivable at runtime by comparing PDF vs `retail`). Validated with node harness. **Caveat:** research methodology split by chunk (see Decisions Log) — treat divergence density as advisory, not gospel.
 - [x] **2.4** Engine: `listMobs` + `getMob` + `tagAgainstMob` (+ `elementColorOf`). Matches on full `chain.elements`; handles `all` rainbow + strong-all/no-weak fallbacks. **Validated:** node harness — Cluster (weak fire) highlights Liquefaction/Fusion/Light; Colibri resists Detonation; Demon resists 9; Ahriman(strong-all) resists all.
 - [x] **2.5** UI: enemy picker (type-to-filter `<datalist>`) + weak-only default + Show-all toggle + weak-hit glow + hot element chip + resisted dim + enemy summary bar. **Validated:** screenshots at 390px (no-enemy = v1; weak-only trims 7→3; show-all floats hits to top).
-- [ ] **2.6** Commit + push (auto-deploys to Pages). **Validation:** live URL, phone check.
+- [x] **2.6** Commit + push (auto-deploys to Pages). Done for the v2 UI/engine (prior commits) and again for 2.3 retail data.
+- [ ] **2.7** *(follow-up, from 2.3)* Wire the **retail-divergence flag** in the UI. Engine already returns `mob.retail` (engine.js `getMob`/`listMobs`); nothing in `app.js`/`styles.css` yet renders it. Compute divergence at render time (PDF `weak`/`strong` set ≠ `retail.weak`/`retail.strong` set) and show a subtle badge/tooltip ("guide says X · retail says Y"), citing `retail.source`. Confirm desired treatment with Scott before building.
 
 ## Post-ship logic — property dominance → moved to its own plan
 

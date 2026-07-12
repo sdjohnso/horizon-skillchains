@@ -110,9 +110,12 @@ html, body {
   padding: 12px 14px;
   border-bottom: 1px solid var(--line);
 }
-.sc-title { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
-.sc-name { font-size: 18px; font-weight: 700; line-height: 1.1; }
-.sc-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.sc-title { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.sc-name {
+  display: flex; align-items: center; flex-wrap: wrap; gap: 8px;
+  font-size: 18px; font-weight: 700; line-height: 1.1;
+}
+.sc-meta { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
 
 .tier-badge {
   font-size: 11px;
@@ -127,14 +130,11 @@ html, body {
 .tier-3 .tier-badge { background: #eef1f8; color: #1a1d27; border-color: #eef1f8; }
 .tier-2 .tier-badge { background: #6d5bd0; color: #fff; border-color: #6d5bd0; }
 
-.elem-chips { display: flex; gap: 5px; }
-.elem-chip {
+.sc-meta-label {
   font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .5px;
   color: var(--muted);
-  padding: 2px 7px;
-  border-radius: 999px;
-  border: 1px solid var(--line);
-  text-transform: capitalize;
 }
 
 /* Orb */
@@ -310,14 +310,11 @@ html, body {
   background: var(--accent);
   padding: 2px 6px;
   border-radius: 999px;
-  margin-left: 8px;
   vertical-align: middle;
 }
-.elem-chip.hot {
-  color: #04121e;
-  background: var(--accent);
-  border-color: var(--accent);
-  font-weight: 700;
+.orb.hot {
+  box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.18),
+              0 0 0 2px var(--accent), 0 0 7px rgba(124,198,255,.7);
 }
 
 @media (max-width: 380px) {

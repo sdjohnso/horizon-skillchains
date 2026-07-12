@@ -2,8 +2,8 @@
 
 **Branch:** `main` (small project; single lane — no worktrees needed)
 **Created:** 2026-07-12
-**Status:** In Progress — data (2.1/2.2) + engine (2.4) + UI (2.5) shipped; property-dominance ("one more logic") shipped as its own plan. **2.3 retail cross-ref now DONE**: 126/130 families have a `retail` block (4 skipped, no retail analog); node-harness validated (JSON parses, no PDF/weapon arrays mutated, tokens valid). Committed + pushed.
-**Next Action:** 2.7 — wire the retail-divergence flag in `app.js`/`styles.css` (data + engine passthrough are ready; UI badge not built yet). Retail layer is now **normalized** to one consistent primary-weakness definition (only 8 genuine divergences remain).
+**Status:** In Progress — data (2.1/2.2) + engine (2.4) + UI (2.5) shipped; property-dominance ("one more logic") shipped as its own plan. **2.3 retail cross-ref DONE** (126/130 families have a `retail` block; validated). **2.8 result-card UI polish DONE**: inline tier pill + WEAK flag, element name-chips → colored MB orbs with weak-element ring. Committed + pushed.
+**Next Action:** 2.7 — wire the retail-divergence flag in `app.js`/`styles.css` (data + engine passthrough are ready; UI badge not built yet). Only open follow-up. Retail layer is **normalized** to one consistent primary-weakness definition (only 8 genuine divergences remain).
 **Purpose:** Let the player pick an enemy and highlight/filter the skillchains that land on an element it's weak to — which also trims the wall of tier-1 results.
 **Security:** N/A — static client-side, no DB/API/user input.
 
@@ -137,6 +137,7 @@ rainbow orb (weak/strong to everything).
 - [x] **2.5** UI: enemy picker (type-to-filter `<datalist>`) + weak-only default + Show-all toggle + weak-hit glow + hot element chip + resisted dim + enemy summary bar. **Validated:** screenshots at 390px (no-enemy = v1; weak-only trims 7→3; show-all floats hits to top).
 - [x] **2.6** Commit + push (auto-deploys to Pages). Done for the v2 UI/engine (prior commits) and again for 2.3 retail data.
 - [ ] **2.7** *(follow-up, from 2.3)* Wire the **retail-divergence flag** in the UI. Engine already returns `mob.retail` (engine.js `getMob`/`listMobs`); nothing in `app.js`/`styles.css` yet renders it. Compute divergence at render time (PDF `weak`/`strong` set ≠ `retail.weak`/`retail.strong` set) and show a subtle badge/tooltip ("guide says X · retail says Y"), citing `retail.source`. Confirm desired treatment with Scott before building.
+- [x] **2.8** UI polish (result cards): moved the tier "Level X" pill + WEAK flag inline onto the skillchain-name row (`.sc-name` now a flex row); replaced the element **name chips** with the enemy card's colored element **orbs** (reused `elementOrb`, added `.orb.hot` ring/glow for the enemy's weak elements), prefixed the orb row with an **"MB:"** label (Scott's request — signals *magic-burst* elements). Removed dead `.elem-chip*` CSS; each orb now carries a `title`. **Validated:** screenshots at 390px — Fragmentation/Detonation/Transfixion cards show name + Level pill + WEAK on one line, orbs below with weak elements ringed; no-enemy state renders all orbs with no WEAK flag; weak-only/Show-all toggle intact.
 
 ## Post-ship logic — property dominance → moved to its own plan
 

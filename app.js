@@ -275,18 +275,20 @@
     var head = el("div", "sc-head");
     head.appendChild(orb(c.chain, false));
     var title = el("div", "sc-title");
-    var name = el("div", "sc-name", Engine.chainLabel(c.chain));
+    var name = el("div", "sc-name");
+    name.appendChild(el("span", "sc-name-text", Engine.chainLabel(c.chain)));
+    name.appendChild(el("span", "tier-badge", "Level " + Engine.tierRoman(c.tier)));
     if (c.weakHit) name.appendChild(el("span", "weak-flag", "weak"));
     title.appendChild(name);
     var meta = el("div", "sc-meta");
-    meta.appendChild(el("span", "tier-badge", "Level " + Engine.tierRoman(c.tier)));
-    var chips = el("span", "elem-chips");
+    meta.appendChild(el("span", "sc-meta-label", "MB:"));
     var hot = {};
     (c.weakElements || []).forEach(function (e) { hot[e] = true; });
     c.elements.forEach(function (e) {
-      chips.appendChild(el("span", "elem-chip" + (hot[e] ? " hot" : ""), e));
+      var o = elementOrb(e);
+      if (hot[e]) o.className += " hot";
+      meta.appendChild(o);
     });
-    meta.appendChild(chips);
     title.appendChild(meta);
     head.appendChild(title);
     card.appendChild(head);

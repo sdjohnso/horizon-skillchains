@@ -110,12 +110,13 @@ html, body {
   padding: 12px 14px;
   border-bottom: 1px solid var(--line);
 }
-.sc-title { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.sc-title { display: flex; flex-direction: column; min-width: 0; }
 .sc-name {
   display: flex; align-items: center; flex-wrap: wrap; gap: 8px;
   font-size: 18px; font-weight: 700; line-height: 1.1;
 }
-.sc-meta { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+/* MB label + element orbs, kept together as one wrapping unit on the name row */
+.sc-mb { display: flex; align-items: center; gap: 6px; }
 
 .tier-badge {
   font-size: 11px;
@@ -131,7 +132,7 @@ html, body {
 .tier-2 .tier-badge { background: #6d5bd0; color: #fff; border-color: #6d5bd0; }
 
 .sc-meta-label {
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 700;
   letter-spacing: .5px;
   color: var(--muted);
@@ -155,6 +156,26 @@ html, body {
 }
 .orb.small { width: 16px; height: 16px; }
 .orb.small::after { top: 2px; left: 3px; width: 5px; height: 4px; }
+/* Larger magic-burst orbs on result cards (tappable) */
+.orb.mb { width: 22px; height: 22px; cursor: pointer; }
+.orb.mb::after { top: 3px; left: 4px; width: 7px; height: 5px; }
+
+/* Element name popup — hover on desktop, tap on touch */
+.elem-tip {
+  position: fixed;
+  z-index: 200;
+  padding: 4px 9px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  box-shadow: 0 4px 16px rgba(0,0,0,.55);
+  white-space: nowrap;
+  pointer-events: none;
+}
+.elem-tip[hidden] { display: none; }
 
 /* Producing pairs */
 .pairs { padding: 8px 14px 12px; display: flex; flex-direction: column; gap: 7px; }

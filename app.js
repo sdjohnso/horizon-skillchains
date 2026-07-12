@@ -62,12 +62,53 @@
   }
 
   // Build a small orb straight from a raw element token (for the enemy's weakness display).
-  function elementOrb(e) {
+  // Pass mb=true for the larger magic-burst orbs on result cards. All element orbs carry
+  // data-elem so the shared tooltip (hover on desktop, tap on touch) can name them.
+  function elementOrb(e, mb) {
     var color = Engine.elementColorOf(e);
-    var n = el("span", "orb small");
+    var label = e.charAt(0).toUpperCase() + e.slice(1);
+    var n = el("span", "orb small" + (mb ? " mb" : ""));
     n.style.background = "radial-gradient(circle at 35% 30%, " + lighten(color) + ", " + color + ")";
-    n.title = e.charAt(0).toUpperCase() + e.slice(1);
+    n.setAttribute("data-elem", label);
+    n.setAttribute("aria-label", label + " element");
     return n;
+  }
+
+  // ----- element help tooltip: hover (desktop) + tap (touch) name popup -----
+  var elemTip;
+  function showElemTip(orb) {
+    var label = orb.getAttribute("data-elem");
+    if (!label) return;
+    if (!elemTip) {
+      elemTip = el("div", "elem-tip");
+      document.body.appendChild(elemTip);
+    }
+    elemTip.textContent = label;
+    elemTip.hidden = false;
+    var r = orb.getBoundingClientRect();
+    var t = elemTip.getBoundingClientRect();
+    var top = r.top - t.height - 8;
+    if (top < 6) top = r.bottom + 8;                 // flip below if no room above
+    var left = r.left + r.width / 2 - t.width / 2;
+    left = Math.max(6, Math.min(left, window.innerWidth - t.width - 6));
+    elemTip.style.top = top + "px";
+    elemTip.style.left = left + "px";
+  }
+  function hideElemTip() { if (elemTip) elemTip.hidden = true; }
+  var elemTipTimer;
+  function initElemTips() {
+    function orbFrom(e) { return e.target.closest ? e.target.closest(".orb[data-elem]") : null; }
+    document.addEventListener("mouseover", function (e) { var o = orbFrom(e); if (o) showElemTip(o); });
+    document.addEventListener("mouseout", function (e) { if (orbFrom(e)) hideElemTip(); });
+    document.addEventListener("click", function (e) {
+      var o = orbFrom(e);
+      if (o) {
+        showElemTip(o);
+        clearTimeout(elemTipTimer);
+        elemTipTimer = setTimeout(hideElemTip, 2000);   // auto-dismiss the tap popup
+      } else { hideElemTip(); }
+    });
+    window.addEventListener("scroll", hideElemTip, true);
   }
   function rainbowOrb(titleText) {
     var n = el("span", "orb small rainbow");
@@ -279,17 +320,17 @@
     name.appendChild(el("span", "sc-name-text", Engine.chainLabel(c.chain)));
     name.appendChild(el("span", "tier-badge", "Level " + Engine.tierRoman(c.tier)));
     if (c.weakHit) name.appendChild(el("span", "weak-flag", "weak"));
-    title.appendChild(name);
-    var meta = el("div", "sc-meta");
-    meta.appendChild(el("span", "sc-meta-label", "MB:"));
+    var mb = el("div", "sc-mb");
+    mb.appendChild(el("span", "sc-meta-label", "MB:"));
     var hot = {};
     (c.weakElements || []).forEach(function (e) { hot[e] = true; });
     c.elements.forEach(function (e) {
-      var o = elementOrb(e);
+      var o = elementOrb(e, true);
       if (hot[e]) o.className += " hot";
-      meta.appendChild(o);
+      mb.appendChild(o);
     });
-    title.appendChild(meta);
+    name.appendChild(mb);
+    title.appendChild(name);
     head.appendChild(title);
     card.appendChild(head);
 
@@ -345,6 +386,7 @@
       enemyClear.addEventListener("click", function () {
         selEnemy.value = ""; showAllChains = false; render(); selEnemy.focus();
       });
+      initElemTips();
       render();
     }).catch(function (err) {
       resultsEl.appendChild(emptyState("Couldn’t load data: " + err.message +

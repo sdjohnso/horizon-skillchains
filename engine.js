@@ -133,40 +133,60 @@
 
     var groups = {}; // chainName -> { chain, tier, elements, pairs: [] }
 
+    // A directed (opener -> closer) WS pair fires exactly ONE skillchain in-game,
+    // not one per property combo. Weapon-skill properties are priority-ordered, so
+    // we resolve the winning combo: highest tier wins; ties break to the lowest
+    // opener index i (dominant opener property), then the lowest closer index j.
+    // Priority order applies to BOTH property lists.
     function tryPair(opener, closer, openerSrc, closerSrc) {
-      var seenForThisPair = {}; // avoid dupe chain per WS-pair (multi-property WS)
-      opener.properties.forEach(function (pA) {
-        closer.properties.forEach(function (pB) {
+      var best = null; // { chain, tier, i, j, pA, pB }
+      for (var i = 0; i < opener.properties.length; i++) {
+        var pA = opener.properties[i];
+        for (var j = 0; j < closer.properties.length; j++) {
+          var pB = closer.properties[j];
           var chain = state.comboMap[key(pA, pB)];
-          if (!chain) return;
-          if (seenForThisPair[chain]) return;
-          seenForThisPair[chain] = true;
-
-          var conf = findConfirmation(opener.name, closer.name);
-          if (conf && conf.status === "fizzles") return; // confirmed no-chain in-game
-          var resultChain = (conf && conf.status === "different" && conf.result) ? conf.result : chain;
-
-          var def = state.skillchains.skillchains[resultChain];
-          if (!def) return;
-          if (!groups[resultChain]) {
-            groups[resultChain] = {
-              chain: resultChain, tier: def.tier, elements: def.elements.slice(), pairs: []
-            };
+          if (!chain) continue;
+          var cdef = state.skillchains.skillchains[chain];
+          if (!cdef) continue;
+          var tier = cdef.tier;
+          if (best === null ||
+              tier > best.tier ||
+              (tier === best.tier && i < best.i) ||
+              (tier === best.tier && i === best.i && j < best.j)) {
+            best = { chain: chain, tier: tier, i: i, j: j, pA: pA, pB: pB };
           }
-          groups[resultChain].pairs.push({
-            opener: opener.name, openerSource: openerSrc.label, openProp: pA,
-            closer: closer.name, closerSource: closerSrc.label, closeProp: pB,
-            status: conf ? conf.status : null
-          });
-        });
+        }
+      }
+      if (best === null) return; // no skillchain for this directed pair
+
+      // Apply the Horizon pairConfirmation override to the resolved winner.
+      var conf = findConfirmation(opener.name, closer.name);
+      if (conf && conf.status === "fizzles") return; // confirmed no-chain in-game
+      var resultChain = (conf && conf.status === "different" && conf.result) ? conf.result : best.chain;
+
+      var def = state.skillchains.skillchains[resultChain];
+      if (!def) return;
+      if (!groups[resultChain]) {
+        groups[resultChain] = {
+          chain: resultChain, tier: def.tier, elements: def.elements.slice(), pairs: []
+        };
+      }
+      groups[resultChain].pairs.push({
+        opener: opener.name, openerSource: openerSrc.label, openProp: best.pA,
+        closer: closer.name, closerSource: closerSrc.label, closeProp: best.pB,
+        status: conf ? conf.status : null
       });
     }
 
     // Both role assignments: A opens / B closes, and B opens / A closes.
+    // When both combatants are the SAME source, skillsA × skillsB already covers
+    // every ordered (opener, closer) index pair once, so flipping each would
+    // compute — and double-count — every directed pair. Flip only when distinct.
+    var sameSource = A.id === B.id;
     skillsA.forEach(function (wa) {
       skillsB.forEach(function (wb) {
         tryPair(wa, wb, A, B);
-        tryPair(wb, wa, B, A);
+        if (!sameSource) tryPair(wb, wa, B, A);
       });
     });
 

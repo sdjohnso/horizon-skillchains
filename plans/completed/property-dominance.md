@@ -2,8 +2,8 @@
 
 **Branch:** `main` (small project; single lane)
 **Created:** 2026-07-12
-**Status:** Not Started
-**Next Action:** Rewrite `engine.js` `tryPair` so each directed (opener→closer) WS pair resolves to exactly ONE skillchain (highest tier; ties by property list-order, opener then closer) instead of emitting every property combo.
+**Status:** ✅ Complete (2026-07-12) — deployed to Pages.
+**Next Action:** None. `engine.js` `tryPair` now resolves one winner per directed pair; also fixed a latent same-source double-count. Validated by node harness (9/9) + 390px screenshot (Archery×Club 55→50 ways).
 **Purpose:** Weapon skills carry **priority-ordered** properties. In-game, a directed WS pair fires exactly one skillchain — not one per property. The current engine emits a chain for every opener-prop × closer-prop combo, so multi-property WS (e.g. Flaming Arrow = `[liquefaction, transfixion]`) show **phantom chains** that never fire and an inflated "N ways" count. This is a correctness bug in the shipped v1 engine, surfaced during v2.
 **Security:** N/A — static client-side, no DB/API/user input.
 

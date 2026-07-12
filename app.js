@@ -75,14 +75,72 @@
     return n;
   }
 
-  function buildMobList() {
-    var list = document.getElementById("mob-list");
-    list.innerHTML = "";
-    Engine.listMobs().forEach(function (m) {
-      var o = document.createElement("option");
-      o.value = m.name;
-      list.appendChild(o);
+  // ----- enemy combobox (custom dropdown; native <datalist> is unreliable on iOS) -----
+  var mobMenu, enemyCaret;     // DOM refs, set in init()
+  var mobFiltered = [];        // names currently shown, in menu order
+  var mobActiveIndex = -1;     // keyboard-highlighted option
+
+  // Render the menu options filtered by the typed query (empty query = all families).
+  function renderMobMenu(query) {
+    var names = Engine.listMobs().map(function (m) { return m.name; });
+    var q = (query || "").trim().toLowerCase();
+    mobFiltered = q ? names.filter(function (n) { return n.toLowerCase().indexOf(q) !== -1; }) : names;
+    mobMenu.innerHTML = "";
+    mobActiveIndex = -1;
+    selEnemy.removeAttribute("aria-activedescendant");
+    if (!mobFiltered.length) {
+      mobMenu.appendChild(el("li", "enemy-menu-empty", "No enemy family matches."));
+      return;
+    }
+    var selected = (selEnemy.value || "").trim().toLowerCase();
+    mobFiltered.forEach(function (name, i) {
+      var li = document.createElement("li");
+      li.className = "enemy-option";
+      li.id = "mob-opt-" + i;
+      li.setAttribute("role", "option");
+      li.textContent = name;
+      if (name.toLowerCase() === selected) li.setAttribute("aria-selected", "true");
+      // mousedown (not click) fires before the input blurs, so the pick registers.
+      li.addEventListener("mousedown", function (e) { e.preventDefault(); selectMob(name); });
+      mobMenu.appendChild(li);
     });
+  }
+
+  function openMobMenu() {
+    renderMobMenu(selEnemy.value);
+    mobMenu.hidden = false;
+    selEnemy.setAttribute("aria-expanded", "true");
+  }
+  function closeMobMenu() {
+    mobMenu.hidden = true;
+    mobActiveIndex = -1;
+    selEnemy.setAttribute("aria-expanded", "false");
+    selEnemy.removeAttribute("aria-activedescendant");
+  }
+  function selectMob(name) {
+    selEnemy.value = name;
+    showAllChains = false;
+    closeMobMenu();
+    render();
+  }
+  // Move the keyboard highlight, wrapping at both ends, and keep it in view.
+  function setMobActive(i) {
+    var opts = mobMenu.querySelectorAll(".enemy-option");
+    if (!opts.length) return;
+    if (i < 0) i = opts.length - 1;
+    else if (i >= opts.length) i = 0;
+    mobActiveIndex = i;
+    opts.forEach(function (o, idx) { o.classList.toggle("active", idx === i); });
+    selEnemy.setAttribute("aria-activedescendant", "mob-opt-" + i);
+    opts[i].scrollIntoView({ block: "nearest" });
+  }
+  function onEnemyKeydown(e) {
+    if (mobMenu.hidden && (e.key === "ArrowDown" || e.key === "ArrowUp")) { openMobMenu(); return; }
+    if (e.key === "ArrowDown") { e.preventDefault(); setMobActive(mobActiveIndex + 1); }
+    else if (e.key === "ArrowUp") { e.preventDefault(); setMobActive(mobActiveIndex - 1); }
+    else if (e.key === "Enter" && !mobMenu.hidden && mobActiveIndex >= 0) {
+      e.preventDefault(); selectMob(mobFiltered[mobActiveIndex]);
+    } else if (e.key === "Escape") { closeMobMenu(); }
   }
 
   // Resolve the typed enemy value to a known family name (case-insensitive), or null.
@@ -158,6 +216,7 @@
 
     var mobName = resolveMob(selEnemy.value);
     enemyClear.hidden = !selEnemy.value;
+    enemyCaret.hidden = !!selEnemy.value;   // caret when empty, clear (×) when filled
 
     if (!a || !b) {
       enemyBar.hidden = true;
@@ -266,15 +325,21 @@
     selEnemy = document.getElementById("selEnemy");
     enemyClear = document.getElementById("enemyClear");
     enemyBar = document.getElementById("enemyBar");
+    mobMenu = document.getElementById("mob-menu");
+    enemyCaret = document.getElementById("enemyCaret");
 
     Engine.load("data/").then(function () {
       buildSelect(selA);
       buildSelect(selB);
-      buildMobList();
       selA.addEventListener("change", render);
       selB.addEventListener("change", render);
-      // Re-render on enemy change; reset the weak-only default whenever the enemy changes.
-      selEnemy.addEventListener("input", function () { showAllChains = false; render(); });
+      // Combobox: open on focus/click (shows all families), filter as you type.
+      selEnemy.addEventListener("focus", openMobMenu);
+      selEnemy.addEventListener("click", openMobMenu);
+      selEnemy.addEventListener("input", function () { showAllChains = false; openMobMenu(); render(); });
+      selEnemy.addEventListener("keydown", onEnemyKeydown);
+      // Blur closes the menu (deferred so an option's mousedown can land first).
+      selEnemy.addEventListener("blur", function () { setTimeout(closeMobMenu, 120); });
       enemyClear.addEventListener("click", function () {
         selEnemy.value = ""; showAllChains = false; render(); selEnemy.focus();
       });

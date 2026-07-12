@@ -213,6 +213,49 @@ html, body {
 }
 .enemy-clear:hover { color: var(--text); }
 
+.enemy-caret {
+  position: absolute;
+  right: 14px; top: 50%;
+  transform: translateY(-50%);
+  color: var(--muted);
+  font-size: 13px;
+  pointer-events: none;          /* taps fall through to the input, which opens the menu */
+}
+
+/* Custom combobox dropdown (replaces the flaky native <datalist> on mobile). */
+.enemy-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0; right: 0;
+  z-index: 20;
+  margin: 0;
+  padding: 4px;
+  list-style: none;
+  max-height: 260px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, .45);
+}
+.enemy-option {
+  padding: 11px 12px;
+  font-size: 15px;
+  line-height: 1.2;
+  color: var(--text);
+  border-radius: 8px;
+  cursor: pointer;
+}
+.enemy-option.active,
+.enemy-option:hover { background: var(--surface); }
+.enemy-option[aria-selected="true"] { color: var(--accent); font-weight: 600; }
+.enemy-menu-empty {
+  padding: 11px 12px;
+  font-size: 14px;
+  color: var(--muted);
+}
+
 .enemy-bar {
   margin-top: 10px;
   padding: 10px 12px;

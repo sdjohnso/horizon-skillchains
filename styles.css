@@ -256,6 +256,7 @@ html, body {
   color: var(--muted);
 }
 
+.enemy-bar[hidden] { display: none; }   /* author display:flex below would otherwise beat [hidden] */
 .enemy-bar {
   margin-top: 10px;
   padding: 10px 12px;

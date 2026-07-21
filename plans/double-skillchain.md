@@ -2,8 +2,8 @@
 
 **Branch:** `main` (small project; single lane — no worktrees needed)
 **Created:** 2026-07-20
-**Status:** In progress. Enemy-filter 2.7 shipped (WIP clear). **3.1 engine DONE + validated** (11/11 node-harness checks vs an independent oracle; tier gate, dedup, terminal-grouping, MB-window invariants all clean). Not yet committed — inert (no UI calls it yet).
-**Next Action:** 3.2 — add empty `chainConfirmations: []` + `_schema` note to `data/overrides.json` and harness-test all three statuses (engine already reads it defensively via `|| []`). Then 3.3 UI.
+**Status:** In progress. Enemy-filter 2.7 shipped. **3.1 engine + 3.2 overrides DONE + validated** (3.1: 11/11 vs oracle; 3.2: 9/9 fizzles/different/confirmed). Both committed. All engine + data plumbing complete and inert (no UI yet).
+**Next Action:** 3.3 — UI: add optional 3rd combatant `selC`; when set, render **doubles-only** two-step cards (final-chain header + link1→link2 sequence rows). MB window = final chain elements (Q2 lean). Leaving C empty keeps v1/v2 untouched.
 **Purpose:** Add an optional **third combatant** so the tool shows **double skillchains** — link 1 (A→B) floats a result, link 2 continues it (float→C) up a tier. This is the headline "Later" feature from v1/v2's parking lots.
 **Security:** N/A — static client-side, no DB/API/user input.
 
@@ -135,10 +135,12 @@ result, `confirmed` earns a ✓. Base data stays pristine; all Horizon truth sta
       `[]`; refactored `findSkillchains` still well-formed. Example: Blast Arrow→Brainshaker=Fragmentation
       (T2) → Decimation = Light (T3).
 
-- [ ] **3.2** Overrides: add `chainConfirmations: []` + `_schema` entry to `overrides.json`; wire it
-      into `resolveLink`/link-2 path (fizzles→drop, different→swap final, confirmed→flag). Add a
-      seeded self-test entry in the node harness (not in the shipped file) proving all three statuses.
-      *Validation:* node harness toggles a temp `chainConfirmations` entry and asserts hide/swap/tick.
+- [x] **3.2** Overrides **DONE.** Added `chainConfirmations: []` + `_schema` entry to `overrides.json`
+      (ships empty); engine already wires it via `findChainConfirmation`/`resolveLink2` (fizzles→drop,
+      different→swap final, confirmed→flag). *Validated:* node harness `scratchpad/harness32.js` — 9/9:
+      empty section parses as `[]`; on a real double (fragmentation→Decimation=light, 5 seq) fizzles
+      removes exactly those 5, different swaps all to a new final chain (grouped correctly), confirmed
+      keeps them with `link2.status==='confirmed'`, and clearing restores baseline.
 
 - [ ] **3.3** UI: add optional `selC` in `index.html` (reuse `buildSelect`); in `app.js`, when C is
       set render **double-chain cards** — a final-chain header (orb + name + "Level III" pill +

@@ -193,6 +193,34 @@
     return hit ? hit.name : null;
   }
 
+  // ----- retail cross-reference (2.7) -----
+  // Two enemy-weakness layers: the PDF/Horizon values the engine uses (mob.weak/strong) and a
+  // retail cross-ref (mob.retail). Surface the divergence subtly; never let retail override PDF.
+  var RETAIL_SOURCE = {
+    allakhazam: "Allakhazam", bg: "BG Wiki", ffxiclopedia: "FFXIclopedia",
+    both: "BG Wiki + FFXIclopedia"
+  };
+  function sameSet(a, b) {
+    a = a || []; b = b || [];
+    if (a.length !== b.length) return false;
+    var s = {}; a.forEach(function (x) { s[x] = true; });
+    return b.every(function (x) { return s[x]; });
+  }
+  // Returns divergence info when the retail layer disagrees with the PDF values, else null.
+  function retailDivergence(mob) {
+    var r = mob && mob.retail;
+    if (!r) return null;
+    var weakDiff = !sameSet(mob.weak, r.weak);
+    var strongDiff = !sameSet(mob.strong, r.strong);
+    if (!weakDiff && !strongDiff) return null;
+    return { weakDiff: weakDiff, strongDiff: strongDiff, retail: r,
+      source: RETAIL_SOURCE[r.source] || r.source || "retail" };
+  }
+  function elemsText(list) {
+    if (!list || !list.length) return "none";
+    return list.map(function (e) { return e.charAt(0).toUpperCase() + e.slice(1); }).join(", ");
+  }
+
   // The enemy summary bar: weakness orbs + how many chains land, + weak-only/show-all toggle.
   function buildEnemyBar(tag, shownCount, totalCount, canToggle) {
     enemyBar.innerHTML = "";
@@ -212,7 +240,33 @@
       orbs.appendChild(el("span", "enemy-orbs-none", "none listed"));
     }
     top.appendChild(orbs);
+
+    // Retail-divergence flag: subtle badge; tap/click toggles a "guide vs retail" note (2.7).
+    var div = retailDivergence(tag.mob);
+    if (div) {
+      var flag = el("button", "retail-flag", "retail differs");
+      flag.type = "button";
+      flag.setAttribute("aria-expanded", "false");
+      top.appendChild(flag);
+    }
     enemyBar.appendChild(top);
+
+    if (div) {
+      var note = el("div", "retail-note");
+      note.hidden = true;
+      var parts = [];
+      if (div.weakDiff) parts.push("weak — guide: " + elemsText(tag.mob.weak) +
+        " · retail: " + elemsText(div.retail.weak));
+      if (div.strongDiff) parts.push("resists — guide: " + elemsText(tag.mob.strong) +
+        " · retail: " + elemsText(div.retail.strong));
+      note.appendChild(el("span", "retail-note-body", parts.join("  |  ")));
+      note.appendChild(el("span", "retail-note-src", "source: " + div.source));
+      enemyBar.appendChild(note);
+      flag.addEventListener("click", function () {
+        note.hidden = !note.hidden;
+        flag.setAttribute("aria-expanded", note.hidden ? "false" : "true");
+      });
+    }
 
     var bottom = el("div", "enemy-bar-bottom");
     var summary = el("span", "enemy-summary");

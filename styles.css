@@ -310,6 +310,34 @@ html, body {
 }
 .enemy-toggle:hover { border-color: var(--accent); }
 
+/* Retail cross-reference divergence flag (2.7) */
+.retail-flag {
+  flex: 0 0 auto;
+  margin-left: auto;                 /* push to the right edge of the top row */
+  padding: 3px 9px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .3px;
+  color: #f0c674;                    /* muted amber = "heads-up, not error" */
+  background: rgba(240, 198, 116, .09);
+  border: 1px solid rgba(240, 198, 116, .38);
+  border-radius: 999px;
+  cursor: pointer;
+}
+.retail-flag:hover { border-color: #f0c674; }
+.retail-flag[aria-expanded="true"] { background: rgba(240, 198, 116, .18); }
+.retail-note {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--muted);
+  padding: 8px 10px;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+.retail-note[hidden] { display: none; }
+.retail-note-src { display: block; margin-top: 3px; font-size: 11px; opacity: .8; }
+
 /* Rainbow orb for "all elements" */
 .orb.rainbow {
   background: conic-gradient(#e23b2e, #e08a3c, #f4d23c, #5fc24e, #2e4fd8, #4fb8e8, #9b3fc4, #e23b2e);

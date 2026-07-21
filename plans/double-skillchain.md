@@ -2,8 +2,8 @@
 
 **Branch:** `main` (small project; single lane — no worktrees needed)
 **Created:** 2026-07-20
-**Status:** In progress. **3.1 engine + 3.2 overrides + 3.3 UI DONE + validated.** 3.1/3.2 committed; 3.3 UI verified at 390px (Playwright), not yet committed. Double-skillchain finder is fully usable; only enemy-filter integration (3.4) + ship (3.5) remain.
-**Next Action:** 3.4 — run `tagAgainstMob` on the **final** chain's elements for doubles (reuse v2 unchanged); weak-only default + show-all toggle + weak-hit float/dim; enemy bar counts. Wire into `renderDoubles` (currently hides the enemy bar).
+**Status:** In progress. **3.1–3.4 DONE + validated.** 3.1/3.2/3.3 committed; 3.4 (enemy filter on doubles) verified at 390px, committing now. Feature is functionally complete — only **3.5 ship** (push to Pages + phone-verify live + CLAUDE.md scope update) remains.
+**Next Action:** 3.5 — push all v3 commits (deploys to Pages), verify on the live URL on a phone, update `CLAUDE.md` (v3→build/shipped, `chainConfirmations` note), move plan to `completed/`, update ROADMAP.
 **Purpose:** Add an optional **third combatant** so the tool shows **double skillchains** — link 1 (A→B) floats a result, link 2 continues it (float→C) up a tier. This is the headline "Later" feature from v1/v2's parking lots.
 **Security:** N/A — static client-side, no DB/API/user input.
 
@@ -153,10 +153,15 @@ result, `confirmed` earns a ✓. Base data stays pristine; all Horizon truth sta
       **zero console errors**; clearing C restores v1. Screenshot confirms Light/Level III card with
       correct 4-element MB orbs + readable `Blast Arrow→Brainshaker=Fragmentation ↳ →Decimation=Light`.
 
-- [ ] **3.4** Enemy filter integration: run `tagAgainstMob` on the **final** chain's `elements` for
-      doubles (reuse unchanged); weak-only default + show-all toggle + weak-hit float/dim carry over.
-      *Validation:* screenshots — an enemy weak to the final chain's element floats/highlights the
-      right doubles; resisted doubles dim; no-enemy state intact.
+- [x] **3.4** Enemy filter integration **DONE.** `renderDoubles` now passes the double **groups**
+      straight to `Engine.tagAgainstMob` (it reads only `.elements` = the final chain and preserves
+      `.sequences`), then reuses the v2 filter/sort/enemy-bar path verbatim (weak-only default,
+      show-all toggle, `sortForDisplay`). `doubleCard` gained the `weak-hit`/`resisted` classes, WEAK
+      flag, and hot MB orbs. *Validated:* Playwright at 390px — Archery/Axe/Club vs **Antlion**
+      (weak wind/light): 9 doubles → **4 weak-only**; enemy bar "Showing 4 that land on a weakness ·
+      Show all 9"; 4 WEAK flags + 5 hot orbs; toggle → 9 shown, 1 resisted/dimmed, weak-hits floated
+      to top; **zero console errors**. Screenshot confirms the Light card's WEAK badge + glow + ringed
+      hot orbs.
 
 - [ ] **3.5** Commit + push (auto-deploys to Pages); verify on the live URL on a phone; update
       `CLAUDE.md` (scope v3→build, `chainConfirmations` note) and `ROADMAP.md`.

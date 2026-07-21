@@ -368,30 +368,58 @@
   // ----- double skillchains (v3): three combatants, two-step sequences -----
   function renderDoubles(a, b, c, mobName) {
     var groups = Engine.findDoubleChains(a, b, c);
-    enemyBar.hidden = true;   // enemy filtering for doubles is wired in 3.4
     if (!groups.length) {
+      enemyBar.hidden = true;
       resultsEl.appendChild(emptyState("No double skillchains — these three can’t chain in sequence."));
       return;
     }
-    var total = groups.reduce(function (n, g) { return n + g.sequences.length; }, 0);
-    resultsEl.appendChild(el("p", "count-line",
-      groups.length + " double" + (groups.length > 1 ? "s" : "") +
-      " · " + total + " way" + (total > 1 ? "s" : "")));
-    groups.forEach(function (g) { resultsEl.appendChild(doubleCard(g)); });
+
+    // No enemy → show every double.
+    if (!mobName) {
+      enemyBar.hidden = true;
+      var ways = groups.reduce(function (n, g) { return n + g.sequences.length; }, 0);
+      resultsEl.appendChild(el("p", "count-line",
+        groups.length + " double" + (groups.length > 1 ? "s" : "") +
+        " · " + ways + " way" + (ways > 1 ? "s" : "")));
+      groups.forEach(function (g) { resultsEl.appendChild(doubleCard(g)); });
+      return;
+    }
+
+    // Enemy chosen → tag on the FINAL chain's elements (tagAgainstMob preserves .sequences),
+    // then filter/highlight exactly like the v2 single-chain path.
+    var tag = Engine.tagAgainstMob(groups, mobName);
+    var total = tag.chains.length;
+    var display, canToggle;
+    if (tag.weakCount === 0) { display = sortForDisplay(tag.chains); canToggle = false; }
+    else if (tag.weakAll) { display = sortForDisplay(tag.chains); canToggle = false; }
+    else if (showAllChains) { display = sortForDisplay(tag.chains); canToggle = true; }
+    else { display = sortForDisplay(tag.chains.filter(function (g) { return g.weakHit; })); canToggle = true; }
+
+    buildEnemyBar(tag, display.length, total, canToggle);
+    display.forEach(function (g) { resultsEl.appendChild(doubleCard(g)); });
   }
 
   // Card for one final skillchain, with every 2-step sequence that reaches it.
   function doubleCard(g) {
     var card = el("div", "sc-card dbl tier-" + g.tier);
+    if (g.weakHit) card.className += " weak-hit";
+    else if (g.resisted) card.className += " resisted";
     var head = el("div", "sc-head");
     head.appendChild(orb(g.chain, false));
     var title = el("div", "sc-title");
     var name = el("div", "sc-name");
     name.appendChild(el("span", "sc-name-text", Engine.chainLabel(g.chain)));
     name.appendChild(el("span", "tier-badge", "Level " + Engine.tierRoman(g.tier)));
+    if (g.weakHit) name.appendChild(el("span", "weak-flag", "weak"));
     var mb = el("div", "sc-mb");                       // MB window = final chain's elements (Q2)
     mb.appendChild(el("span", "sc-meta-label", "Magic Burst:"));
-    g.elements.forEach(function (e) { mb.appendChild(elementOrb(e, true)); });
+    var hot = {};
+    (g.weakElements || []).forEach(function (e) { hot[e] = true; });
+    g.elements.forEach(function (e) {
+      var o = elementOrb(e, true);
+      if (hot[e]) o.className += " hot";
+      mb.appendChild(o);
+    });
     name.appendChild(mb);
     title.appendChild(name);
     head.appendChild(title);

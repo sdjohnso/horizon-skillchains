@@ -8,7 +8,7 @@ data_sources: [Skillchain_Guide PDF (Scott's own), Horizon wiki (cross-check onl
 input: user-selected jobs + weapons (or summoner + avatar)
 output: list of formable skillchains with tier + magic-burst elements
 depends_on: []
-updated: 2026-07-12
+updated: 2026-07-20
 ---
 
 # Horizon Skillchains
@@ -64,6 +64,11 @@ When Scott reports a result from in-game, update `overrides.json` (never the bas
   `"Weapon Skill Name": ["prop1", "prop2"]` (replaces that WS's properties everywhere).
 - **The property *combination rule* differs on Horizon** (e.g. Detonation->Compression makes something
   else, or nothing) → add to `comboOverrides`: `{ "open": "...", "close": "...", "chain": "..."|null }`.
+- **A *double skillchain's second link* behaves differently** (a floating result token + a specific
+  closing WS) → add to `chainConfirmations`: `{ "from": "liquefaction", "ws": "Closer WS", "result":
+  "..."|null, "status": "confirmed"|"fizzles"|"different" }`. Note: `pairConfirmations` (link 1),
+  `weaponSkillProperties`, and `comboOverrides` already apply to **both** links automatically — use
+  `chainConfirmations` only for a link-2 result that hinges on the specific closing weapon skill.
 
 Property tokens = the 8 tier-1 names + the 4 tier-2 names (fusion/fragmentation/gravitation/distortion).
 `a` opens, `b` closes (order matters for tier 1 & 2). Note `Thunder Thrust` was already set to retail
@@ -71,8 +76,12 @@ Property tokens = the 8 tier-1 names + the 4 tier-2 names (fusion/fragmentation/
 
 ## Scope
 
-- **v1:** 2 combatants -> skillchain finder, with Summoner + avatar support.
-- **v2:** enemy weakness filter (highlight chains that END on an element the enemy is weak to).
-- **Later:** 3-6 party + multi-step chaining; per-job weapon-skill level gating.
+- **v1:** 2 combatants -> skillchain finder, with Summoner + avatar support. **Shipped.**
+- **v2:** enemy weakness filter (highlight chains that END on an element the enemy is weak to). **Shipped.**
+- **v3:** optional **3rd combatant -> double skillchains** (link 1 floats a result token, link 2
+  continues it up a tier). Doubles-only view when three are set; the enemy filter tags the **final**
+  chain's elements. Engine: `findDoubleChains(idA,idB,idC)` (link 2 reuses the link-1 combo lookup;
+  the combo table itself enforces the tier gate — a floating T2 can only reach T3, T3 never opens). **Shipped.**
+- **Later:** 4-6 party + triple+ chaining; per-job weapon-skill level gating; weapon damage-type weakness.
 
-See `plans/skillchain-finder.md` for the working plan.
+Plans live in `plans/` (`completed/` for shipped work); see `plans/ROADMAP.md`.

@@ -2,8 +2,8 @@
 
 **Branch:** `main` (small project; single lane — no worktrees needed)
 **Created:** 2026-07-20
-**Status:** In progress. **3.1–3.4 DONE + validated.** 3.1/3.2/3.3 committed; 3.4 (enemy filter on doubles) verified at 390px, committing now. Feature is functionally complete — only **3.5 ship** (push to Pages + phone-verify live + CLAUDE.md scope update) remains.
-**Next Action:** 3.5 — push all v3 commits (deploys to Pages), verify on the live URL on a phone, update `CLAUDE.md` (v3→build/shipped, `chainConfirmations` note), move plan to `completed/`, update ROADMAP.
+**Status:** ✅ COMPLETE — all steps (3.1–3.5) done, validated, and pushed to Pages. Double-skillchain finder is live. CLAUDE.md scope + overrides workflow updated; plan moved to `completed/`.
+**Next Action:** None — v3 shipped. Live: https://sdjohnso.github.io/horizon-skillchains/
 **Purpose:** Add an optional **third combatant** so the tool shows **double skillchains** — link 1 (A→B) floats a result, link 2 continues it (float→C) up a tier. This is the headline "Later" feature from v1/v2's parking lots.
 **Security:** N/A — static client-side, no DB/API/user input.
 
@@ -152,6 +152,10 @@ result, `confirmed` earns a ✓. Base data stays pristine; all Horizon truth sta
       "7 skillchains · 63 ways" (v1); C set → "9 doubles · 350 ways", 9 cards, enemy bar hidden,
       **zero console errors**; clearing C restores v1. Screenshot confirms Light/Level III card with
       correct 4-element MB orbs + readable `Blast Arrow→Brainshaker=Fragmentation ↳ →Decimation=Light`.
+
+- [x] **3.5** Ship **DONE.** Pushed all v3 commits (3.1–3.4 + docs) to `main` → auto-deployed to
+      Pages. Updated `CLAUDE.md` (Scope: v3 shipped; overrides workflow: `chainConfirmations` bullet).
+      Verified on the live URL. Plan moved to `completed/`; ROADMAP updated.
 
 - [x] **3.4** Enemy filter integration **DONE.** `renderDoubles` now passes the double **groups**
       straight to `Engine.tagAgainstMob` (it reads only `.elements` = the final chain and preserves

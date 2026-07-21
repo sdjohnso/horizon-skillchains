@@ -2,8 +2,8 @@
 
 **Branch:** `main` (small project; single lane — no worktrees needed)
 **Created:** 2026-07-20
-**Status:** Not started — planned. Mechanic (#3) + override schema (#4) settled with Scott; data model verified chain-ready. **Gated on:** enemy-filter 2.7 shipped or parked (respect WIP=2).
-**Next Action:** 3.1 — build `Engine.findDoubleChains(idA, idB, idC)` (pure, node-tested) reusing the existing link-1 dominance resolver, then feeding the resolved floating token back through the same combo lookup for link 2.
+**Status:** In progress. Enemy-filter 2.7 shipped (WIP clear). **3.1 engine DONE + validated** (11/11 node-harness checks vs an independent oracle; tier gate, dedup, terminal-grouping, MB-window invariants all clean). Not yet committed — inert (no UI calls it yet).
+**Next Action:** 3.2 — add empty `chainConfirmations: []` + `_schema` note to `data/overrides.json` and harness-test all three statuses (engine already reads it defensively via `|| []`). Then 3.3 UI.
 **Purpose:** Add an optional **third combatant** so the tool shows **double skillchains** — link 1 (A→B) floats a result, link 2 continues it (float→C) up a tier. This is the headline "Later" feature from v1/v2's parking lots.
 **Security:** N/A — static client-side, no DB/API/user input.
 
@@ -98,9 +98,8 @@ result, `confirmed` earns a ✓. Base data stays pristine; all Horizon truth sta
 
 ## Open Questions (confirm with Scott before/*during* 3.1–3.3)
 
-1. **When C is set, still show the single (2-combatant) chains too, or doubles only?**
-   Lean: **doubles as the primary view, with a "singles" collapsible/section** so you don't lose the
-   pairwise info — but confirm; "doubles only" is simpler if that's what you want.
+1. ~~When C is set, show singles too or doubles only?~~ **DECIDED: doubles only** when all three are
+   set. Two combatants (C empty) already show the single weapon-skill chains — no need to repeat them.
 2. **Magic-burst window for a double = the final chain (F2) elements?** Lean: **yes** — consistent
    with v2's "whole chain's element set is the MB window" rule; F2 is what's on screen when you burst.
 3. **Same source picked for 2–3 roles** (e.g. three players on the same weapon type) — allow it?
@@ -117,21 +116,24 @@ result, `confirmed` earns a ✓. Base data stays pristine; all Horizon truth sta
 | 2026-07-20 | #4 settled: `comboOverrides`/`weaponSkillProperties` already cover link 2; keep `pairConfirmations` for link 1; add **`chainConfirmations`** (`from` token + closer `ws`) for link-2-specific empirical results; ships empty | Reuse over fork; matches how Horizon differences are discovered by testing |
 | 2026-07-20 | Link 2 chains from the **override-resolved** link-1 result, not the PDF prediction | Correctness: a Horizon `different`/`fizzles` on link 1 must flow through |
 | 2026-07-20 | Gated on enemy-filter 2.7 (ship or park) to respect WIP=2 | Plan-system WIP discipline |
+| 2026-07-20 | Q1 DECIDED: **doubles only** when C is set; 2-combatant mode keeps showing single WS chains | Scott — singles are already covered by the 2-combatant view; no need to duplicate |
 
 ## Phases
 
 ### Phase 3 — Double skillchain
 
-- [ ] **3.1** Engine: refactor `tryPair`'s winner-resolution into reusable `resolveLink(openerProps,
-      closerProps, openerName, closerName) → { chain, tier, pA, pB } | null` (dominance: highest tier,
-      ties by opener index then closer index; applies `pairConfirmations`). Then add
-      `findDoubleChains(idA,idB,idC)`: iterate ordered (first,second,third) role assignments over the
-      three sources; link 1 via `resolveLink`; if `tier<3`, link 2 via `resolveLink` with F1 as the
-      opener property + `chainConfirmations` applied; emit sequences; dominance per ordered WS-triple;
-      dedup; group by final chain; sort by final tier desc. **Pure, no DOM.**
-      *Validation:* node harness — e.g. a known Liquefaction→(Fusion) double resolves and terminates;
-      a T2-floating case yields only T3 finals; illegal T2→T1 never appears; empty/duplicate sources
-      behave. Compare counts against hand-worked examples from the PDF.
+- [x] **3.1** Engine **DONE.** Extracted `tryPair`'s dominance into shared `resolveCombo(openerProps,
+      closerProps)` (identical logic; `tryPair` now calls it). Added `resolveLink1` (WS+WS, applies
+      `pairConfirmations`), `resolveLink2` (floating token + WS, applies `chainConfirmations`),
+      `findChainConfirmation`, and `findDoubleChains(idA,idB,idC)`: 6 ordered role permutations
+      (deduped by source-id triple), link 1 → if `tier<3` link 2 from the resolved float, sequence
+      dedup, group by final chain, sorted final-tier desc + deterministic within-group order. Exposed
+      on `window.Engine`. **Pure, no DOM.** *Validated:* node harness `scratchpad/harness31.js` — 11/11:
+      engine output == an independent oracle (350 seq / 9 groups for Archery/Axe/Club **and** the
+      all-same-source case); tier gate (no T2→non-T3) 0 bad; never starts link 2 from a T3 float;
+      every seq's `link2.result` matches its group; MB elements == final chain elements; unknown id →
+      `[]`; refactored `findSkillchains` still well-formed. Example: Blast Arrow→Brainshaker=Fragmentation
+      (T2) → Decimation = Light (T3).
 
 - [ ] **3.2** Overrides: add `chainConfirmations: []` + `_schema` entry to `overrides.json`; wire it
       into `resolveLink`/link-2 path (fizzles→drop, different→swap final, confirmed→flag). Add a

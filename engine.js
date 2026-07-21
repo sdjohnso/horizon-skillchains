@@ -122,6 +122,68 @@
     return null;
   }
 
+  // Look up a chainConfirmation for link 2: a floating result token `from` closed by WS `wsName`.
+  function findChainConfirmation(fromToken, wsName) {
+    var list = (state.overrides.chainConfirmations || []);
+    for (var i = 0; i < list.length; i++) {
+      if (list[i].from === fromToken && list[i].ws === wsName) return list[i];
+    }
+    return null;
+  }
+
+  // Pure property-combo dominance: given ordered opener & closer property lists, return the single
+  // winning skillchain combo { chain, tier, i, j, pA, pB } or null. Highest tier wins; ties break to
+  // the lowest opener index i, then the lowest closer index j (priority order applies to both lists).
+  // Shared by link 1 (two WS arsenals) and link 2 (a single floating token vs. a WS arsenal).
+  function resolveCombo(openerProps, closerProps) {
+    var best = null;
+    for (var i = 0; i < openerProps.length; i++) {
+      var pA = openerProps[i];
+      for (var j = 0; j < closerProps.length; j++) {
+        var pB = closerProps[j];
+        var chain = state.comboMap[key(pA, pB)];
+        if (!chain) continue;
+        var cdef = state.skillchains.skillchains[chain];
+        if (!cdef) continue;
+        var tier = cdef.tier;
+        if (best === null || tier > best.tier ||
+            (tier === best.tier && i < best.i) ||
+            (tier === best.tier && i === best.i && j < best.j)) {
+          best = { chain: chain, tier: tier, i: i, j: j, pA: pA, pB: pB };
+        }
+      }
+    }
+    return best;
+  }
+
+  // Resolve link 1 (two weapon skills, order matters). Applies pairConfirmations to the winning
+  // combo (fizzles -> null; different -> swap result). Returns a resolved-result object or null.
+  function resolveLink1(ws1, ws2) {
+    var best = resolveCombo(ws1.properties, ws2.properties);
+    if (!best) return null;
+    var conf = findConfirmation(ws1.name, ws2.name);
+    if (conf && conf.status === "fizzles") return null;
+    var resultChain = (conf && conf.status === "different" && conf.result) ? conf.result : best.chain;
+    var def = state.skillchains.skillchains[resultChain];
+    if (!def) return null;
+    return { chain: resultChain, tier: def.tier, elements: def.elements.slice(),
+             openProp: best.pA, closeProp: best.pB, status: conf ? conf.status : null };
+  }
+
+  // Resolve link 2: the floating result token `fromToken` opens, weapon skill `ws3` closes.
+  // Applies chainConfirmations (fizzles -> null; different -> swap). Returns resolved-result or null.
+  function resolveLink2(fromToken, ws3) {
+    var best = resolveCombo([fromToken], ws3.properties);
+    if (!best) return null;
+    var conf = findChainConfirmation(fromToken, ws3.name);
+    if (conf && conf.status === "fizzles") return null;
+    var resultChain = (conf && conf.status === "different" && conf.result) ? conf.result : best.chain;
+    var def = state.skillchains.skillchains[resultChain];
+    if (!def) return null;
+    return { chain: resultChain, tier: def.tier, elements: def.elements.slice(),
+             fromProp: fromToken, closeProp: best.pB, status: conf ? conf.status : null };
+  }
+
   // Core: given two source ids, return every skillchain the two arsenals can form.
   // Result: array of chain groups, sorted by tier desc, each with the WS pairs that make it.
   function findSkillchains(idA, idB) {
@@ -139,24 +201,7 @@
     // opener index i (dominant opener property), then the lowest closer index j.
     // Priority order applies to BOTH property lists.
     function tryPair(opener, closer, openerSrc, closerSrc) {
-      var best = null; // { chain, tier, i, j, pA, pB }
-      for (var i = 0; i < opener.properties.length; i++) {
-        var pA = opener.properties[i];
-        for (var j = 0; j < closer.properties.length; j++) {
-          var pB = closer.properties[j];
-          var chain = state.comboMap[key(pA, pB)];
-          if (!chain) continue;
-          var cdef = state.skillchains.skillchains[chain];
-          if (!cdef) continue;
-          var tier = cdef.tier;
-          if (best === null ||
-              tier > best.tier ||
-              (tier === best.tier && i < best.i) ||
-              (tier === best.tier && i === best.i && j < best.j)) {
-            best = { chain: chain, tier: tier, i: i, j: j, pA: pA, pB: pB };
-          }
-        }
-      }
+      var best = resolveCombo(opener.properties, closer.properties); // { chain, tier, i, j, pA, pB }
       if (best === null) return; // no skillchain for this directed pair
 
       // Apply the Horizon pairConfirmation override to the resolved winner.
@@ -194,6 +239,82 @@
     arr.sort(function (x, y) {
       if (y.tier !== x.tier) return y.tier - x.tier;       // higher tier first
       return x.chain.localeCompare(y.chain);
+    });
+    return arr;
+  }
+
+  // ----- double skillchains (v3) -----
+
+  // Ordered role assignments of the 3 arsenals: (opener1, closer1, closer2). Order matters, so all
+  // 6 permutations are distinct chains; identical-source assignments are de-duped at runtime.
+  var ROLE_PERMS = [[0,1,2],[0,2,1],[1,0,2],[1,2,0],[2,0,1],[2,1,0]];
+
+  // Core: given three source ids, return every DOUBLE skillchain the trio can form — link 1
+  // (opener1 -> closer1) floats a result token, link 2 (that token -> closer2) continues it up a
+  // tier. The combo table itself enforces the tier gate (a floating T2 can ONLY reach T3; T3 never
+  // opens), so no separate tier check is needed beyond stopping when link 1 is already T3.
+  // Result: array of groups keyed by the FINAL chain, sorted by final tier desc, each with the
+  // 2-step sequences that make it (deterministically ordered).
+  function findDoubleChains(idA, idB, idC) {
+    var srcs = [getSource(idA), getSource(idB), getSource(idC)];
+    if (!srcs[0] || !srcs[1] || !srcs[2]) return [];
+    var wsOv = state.overrides.weaponSkillProperties;
+    var arsenals = srcs.map(function (s) {
+      return { src: s, skills: applyWSOverrides(s.skills, wsOv) };
+    });
+
+    var groups = {};    // finalChain -> { chain, tier, elements, sequences: [] }
+    var seenSeq = {};   // dedup identical displayed sequences (cross-permutation safety net)
+    var permSeen = {};  // skip identical role assignments when sources repeat
+
+    ROLE_PERMS.forEach(function (perm) {
+      var first = arsenals[perm[0]], second = arsenals[perm[1]], third = arsenals[perm[2]];
+      var pkey = first.src.id + ">" + second.src.id + ">" + third.src.id;
+      if (permSeen[pkey]) return;
+      permSeen[pkey] = true;
+
+      first.skills.forEach(function (ws1) {
+        second.skills.forEach(function (ws2) {
+          var l1 = resolveLink1(ws1, ws2);
+          if (!l1) return;
+          if (l1.tier >= 3) return;            // T3 is terminal — no room for a second link
+          third.skills.forEach(function (ws3) {
+            var l2 = resolveLink2(l1.chain, ws3);
+            if (!l2) return;
+
+            var skey = ws1.name + "@" + first.src.id + "|" + ws2.name + "@" + second.src.id +
+                       "|" + l1.chain + "|" + ws3.name + "@" + third.src.id + "|" + l2.chain;
+            if (seenSeq[skey]) return;
+            seenSeq[skey] = true;
+
+            var def = state.skillchains.skillchains[l2.chain];
+            if (!groups[l2.chain]) {
+              groups[l2.chain] = { chain: l2.chain, tier: def.tier,
+                                   elements: def.elements.slice(), sequences: [] };
+            }
+            groups[l2.chain].sequences.push({
+              link1: { opener: ws1.name, openerSource: first.src.label, openProp: l1.openProp,
+                       closer: ws2.name, closerSource: second.src.label, closeProp: l1.closeProp,
+                       result: l1.chain, resultTier: l1.tier, status: l1.status },
+              link2: { fromProp: l1.chain, closer: ws3.name, closerSource: third.src.label,
+                       closeProp: l2.closeProp, result: l2.chain, status: l2.status }
+            });
+          });
+        });
+      });
+    });
+
+    var arr = Object.keys(groups).map(function (k) { return groups[k]; });
+    arr.sort(function (x, y) {
+      if (y.tier !== x.tier) return y.tier - x.tier;       // higher final tier first
+      return x.chain.localeCompare(y.chain);
+    });
+    arr.forEach(function (g) {                              // deterministic order within each group
+      g.sequences.sort(function (p, q) {
+        return p.link1.result.localeCompare(q.link1.result) ||
+               p.link1.opener.localeCompare(q.link1.opener) ||
+               p.link2.closer.localeCompare(q.link2.closer);
+      });
     });
     return arr;
   }
@@ -283,6 +404,7 @@
     listSources: listSources,
     getSource: getSource,
     findSkillchains: findSkillchains,
+    findDoubleChains: findDoubleChains,
     listMobs: listMobs,
     getMob: getMob,
     tagAgainstMob: tagAgainstMob,

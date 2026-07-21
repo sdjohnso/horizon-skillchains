@@ -2,7 +2,7 @@
 (function () {
   "use strict";
 
-  var selA, selB, resultsEl, selEnemy, enemyClear, enemyBar;
+  var selA, selB, selC, resultsEl, selEnemy, enemyClear, enemyBar;
   var showAllChains = false;   // enemy filter: false = weak-only (default), true = show all
 
   function el(tag, cls, text) {
@@ -306,12 +306,15 @@
   }
 
   function render() {
-    var a = selA.value, b = selB.value;
+    var a = selA.value, b = selB.value, c = selC.value;
     resultsEl.innerHTML = "";
 
     var mobName = resolveMob(selEnemy.value);
     enemyClear.hidden = !selEnemy.value;
     enemyCaret.hidden = !!selEnemy.value;   // caret when empty, clear (×) when filled
+
+    // Three combatants → double-skillchain mode (doubles only). Two → the single-chain finder.
+    if (a && b && c) { renderDoubles(a, b, c, mobName); return; }
 
     if (!a || !b) {
       enemyBar.hidden = true;
@@ -361,6 +364,83 @@
   }
 
   function emptyState(msg) { return el("div", "empty", msg); }
+
+  // ----- double skillchains (v3): three combatants, two-step sequences -----
+  function renderDoubles(a, b, c, mobName) {
+    var groups = Engine.findDoubleChains(a, b, c);
+    enemyBar.hidden = true;   // enemy filtering for doubles is wired in 3.4
+    if (!groups.length) {
+      resultsEl.appendChild(emptyState("No double skillchains — these three can’t chain in sequence."));
+      return;
+    }
+    var total = groups.reduce(function (n, g) { return n + g.sequences.length; }, 0);
+    resultsEl.appendChild(el("p", "count-line",
+      groups.length + " double" + (groups.length > 1 ? "s" : "") +
+      " · " + total + " way" + (total > 1 ? "s" : "")));
+    groups.forEach(function (g) { resultsEl.appendChild(doubleCard(g)); });
+  }
+
+  // Card for one final skillchain, with every 2-step sequence that reaches it.
+  function doubleCard(g) {
+    var card = el("div", "sc-card dbl tier-" + g.tier);
+    var head = el("div", "sc-head");
+    head.appendChild(orb(g.chain, false));
+    var title = el("div", "sc-title");
+    var name = el("div", "sc-name");
+    name.appendChild(el("span", "sc-name-text", Engine.chainLabel(g.chain)));
+    name.appendChild(el("span", "tier-badge", "Level " + Engine.tierRoman(g.tier)));
+    var mb = el("div", "sc-mb");                       // MB window = final chain's elements (Q2)
+    mb.appendChild(el("span", "sc-meta-label", "Magic Burst:"));
+    g.elements.forEach(function (e) { mb.appendChild(elementOrb(e, true)); });
+    name.appendChild(mb);
+    title.appendChild(name);
+    head.appendChild(title);
+    card.appendChild(head);
+
+    var seqs = el("div", "seqs");
+    g.sequences.forEach(function (s) { seqs.appendChild(sequenceRow(s)); });
+    card.appendChild(seqs);
+    return card;
+  }
+
+  // Two rows: link 1 (WS→WS ⇒ float) then link 2 (float→WS ⇒ final).
+  function sequenceRow(s) {
+    var wrap = el("div", "seq");
+
+    var r1 = el("div", "seq-step");
+    r1.appendChild(wsSpan(s.link1.opener, s.link1.openerSource, s.link1.openProp));
+    r1.appendChild(el("span", "arrow", "→"));
+    r1.appendChild(wsSpan(s.link1.closer, s.link1.closerSource, s.link1.closeProp));
+    r1.appendChild(el("span", "seq-eq", "="));
+    r1.appendChild(scResult(s.link1.result));
+    if (s.link1.status === "confirmed") r1.appendChild(tick());
+    wrap.appendChild(r1);
+
+    var r2 = el("div", "seq-step seq-step2");
+    r2.appendChild(el("span", "seq-carry", "↳"));     // the float carries into link 2
+    r2.appendChild(scResult(s.link2.fromProp));
+    r2.appendChild(el("span", "arrow", "→"));
+    r2.appendChild(wsSpan(s.link2.closer, s.link2.closerSource, s.link2.closeProp));
+    r2.appendChild(el("span", "seq-eq", "="));
+    r2.appendChild(scResult(s.link2.result));
+    if (s.link2.status === "confirmed") r2.appendChild(tick());
+    wrap.appendChild(r2);
+
+    return wrap;
+  }
+
+  // A small inline chip for a skillchain result: its orb (element-colored) + name.
+  function scResult(token) {
+    var s = el("span", "sc-result");
+    s.appendChild(orb(token, true));
+    s.appendChild(el("span", "sc-result-name", Engine.chainLabel(token)));
+    return s;
+  }
+  function tick() {
+    var t = el("span", "confirm-tick", "✓");
+    t.title = "Confirmed on Horizon";
+    return t;
+  }
 
   function chainCard(c) {
     var card = el("div", "sc-card tier-" + c.tier);
@@ -418,6 +498,7 @@
   function init() {
     selA = document.getElementById("selA");
     selB = document.getElementById("selB");
+    selC = document.getElementById("selC");
     resultsEl = document.getElementById("results");
     selEnemy = document.getElementById("selEnemy");
     enemyClear = document.getElementById("enemyClear");
@@ -428,8 +509,10 @@
     Engine.load("data/").then(function () {
       buildSelect(selA);
       buildSelect(selB);
+      buildSelect(selC);
       selA.addEventListener("change", render);
       selB.addEventListener("change", render);
+      selC.addEventListener("change", render);
       // Combobox: open on focus/click (shows all families), filter as you type.
       selEnemy.addEventListener("focus", openMobMenu);
       selEnemy.addEventListener("click", openMobMenu);

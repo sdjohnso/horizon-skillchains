@@ -47,9 +47,9 @@ html, body {
 /* Pickers */
 .pickers {
   display: grid;
-  grid-template-columns: 1fr auto 1fr;
+  grid-template-columns: 1fr auto 1fr auto 1fr;
   align-items: end;
-  gap: 10px;
+  gap: 8px;
   margin-bottom: 22px;
 }
 .picker label {
@@ -372,7 +372,21 @@ html, body {
   .sc-mb { flex-basis: 100%; margin-top: 4px; }
 }
 
-@media (max-width: 380px) {
+/* Two-step double-skillchain card (v3) */
+.seqs { padding: 8px 14px 12px; display: flex; flex-direction: column; gap: 10px; }
+.seq { display: flex; flex-direction: column; gap: 3px; }
+.seq + .seq { border-top: 1px dashed var(--line); padding-top: 10px; }
+.seq-step {
+  display: flex; align-items: center; flex-wrap: wrap; gap: 6px;
+  font-size: 14px;
+}
+.seq-carry { color: var(--muted); font-weight: 700; font-size: 15px; margin-right: -1px; }
+.seq-eq { color: var(--muted); font-weight: 700; }
+.sc-result { display: inline-flex; align-items: center; gap: 5px; }
+.sc-result-name { font-weight: 700; }
+
+/* Narrow phones: three pickers won't fit side by side — stack them, hide the ⊗ arrows. */
+@media (max-width: 560px) {
   .pickers { grid-template-columns: 1fr; }
   .chain-arrow { display: none; }
 }

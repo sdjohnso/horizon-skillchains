@@ -2,8 +2,8 @@
 
 **Branch:** `main` (small project; single lane — no worktrees needed)
 **Created:** 2026-07-20
-**Status:** In progress. Enemy-filter 2.7 shipped. **3.1 engine + 3.2 overrides DONE + validated** (3.1: 11/11 vs oracle; 3.2: 9/9 fizzles/different/confirmed). Both committed. All engine + data plumbing complete and inert (no UI yet).
-**Next Action:** 3.3 — UI: add optional 3rd combatant `selC`; when set, render **doubles-only** two-step cards (final-chain header + link1→link2 sequence rows). MB window = final chain elements (Q2 lean). Leaving C empty keeps v1/v2 untouched.
+**Status:** In progress. **3.1 engine + 3.2 overrides + 3.3 UI DONE + validated.** 3.1/3.2 committed; 3.3 UI verified at 390px (Playwright), not yet committed. Double-skillchain finder is fully usable; only enemy-filter integration (3.4) + ship (3.5) remain.
+**Next Action:** 3.4 — run `tagAgainstMob` on the **final** chain's elements for doubles (reuse v2 unchanged); weak-only default + show-all toggle + weak-hit float/dim; enemy bar counts. Wire into `renderDoubles` (currently hides the enemy bar).
 **Purpose:** Add an optional **third combatant** so the tool shows **double skillchains** — link 1 (A→B) floats a result, link 2 continues it (float→C) up a tier. This is the headline "Later" feature from v1/v2's parking lots.
 **Security:** N/A — static client-side, no DB/API/user input.
 
@@ -142,12 +142,16 @@ result, `confirmed` earns a ✓. Base data stays pristine; all Horizon truth sta
       removes exactly those 5, different swaps all to a new final chain (grouped correctly), confirmed
       keeps them with `link2.status==='confirmed'`, and clearing restores baseline.
 
-- [ ] **3.3** UI: add optional `selC` in `index.html` (reuse `buildSelect`); in `app.js`, when C is
-      set render **double-chain cards** — a final-chain header (orb + name + "Level III" pill +
-      Magic-Burst orbs) over a two-row sequence body (link 1 pair → link 2 pair, `→` arrows, ✓ ticks).
-      Leaving C empty keeps the existing path untouched. `styles.css` for the two-step card.
-      *Validation:* screenshots at 390px — C empty = v1/v2 identical; C set shows readable 2-step
-      cards; long WS names wrap without breaking the sequence.
+- [x] **3.3** UI **DONE.** Added optional `selC` (`index.html`, reuses `buildSelect`); grid now
+      `1fr auto 1fr auto 1fr`, stacks single-column ≤560px (three pickers won't fit on a phone).
+      `render()` branches to `renderDoubles(a,b,c)` when all three are set → **doubles-only** cards:
+      final-chain header (orb + name + "Level III" pill + Magic-Burst orbs = final chain's elements)
+      over per-sequence two-row bodies (`sequenceRow`: link 1 WS→WS ⇒ float chip, then `↳` float →
+      WS ⇒ final chip; ✓ ticks on confirmed). New `scResult` chip + `.seqs/.seq/.seq-step` CSS.
+      Leaving C empty keeps v1/v2 byte-identical. *Validated:* Playwright at 390px — C empty →
+      "7 skillchains · 63 ways" (v1); C set → "9 doubles · 350 ways", 9 cards, enemy bar hidden,
+      **zero console errors**; clearing C restores v1. Screenshot confirms Light/Level III card with
+      correct 4-element MB orbs + readable `Blast Arrow→Brainshaker=Fragmentation ↳ →Decimation=Light`.
 
 - [ ] **3.4** Enemy filter integration: run `tagAgainstMob` on the **final** chain's `elements` for
       doubles (reuse unchanged); weak-only default + show-all toggle + weak-hit float/dim carry over.
